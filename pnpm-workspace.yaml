@@ -1,0 +1,3 @@
+onlyBuiltDependencies:
+  - ect-bin
+  - esbuild
