@@ -38,16 +38,33 @@ export function drawSpline(
 
 export function drawCircle(
   ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
+  pos: Vector2,
   r: number,
 ) {
   ctx.ellipse(
-    ctx.canvas.width / 2 + x,
-    ctx.canvas.height / 2 + y,
+    ctx.canvas.width / 2 + pos.x,
+    ctx.canvas.height / 2 + pos.y,
     r,
     r,
     0,
+    0,
+    Math.PI * 2,
+  );
+}
+
+export function drawEllipse(
+  ctx: CanvasRenderingContext2D,
+  pos: Vector2,
+  rx: number,
+  ry: number,
+  rotation: number,
+) {
+  ctx.ellipse(
+    ctx.canvas.width / 2 + pos.x,
+    ctx.canvas.height / 2 + pos.y,
+    rx,
+    ry,
+    rotation,
     0,
     Math.PI * 2,
   );

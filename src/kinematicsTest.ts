@@ -1,17 +1,16 @@
-import { drawCircle, drawSpline } from "./util/draw";
-import { clamp, normalizeAngle, relativeAngleDiff } from "./util/util";
+import { resolveChain, type Chain } from "./util/chain";
+import { drawCircle, drawEllipse, drawSpline } from "./util/draw";
+import { normalizeAngle, relativeAngleDiff } from "./util/util";
 import { Vector2 } from "./util/vector2";
 
-type Chain = {
-  joint: Vector2;
-  angle: number;
-  width: number;
-}[];
-
-const segmentCount = 6;
-const segmentLength = 50;
-const segmentWidth = [50, 50, 45, 40, 30, 20];
-const maxAngle = Math.PI / 4;
+const scale = 0.7;
+const segmentCount = 12;
+const bodyLength = 10;
+const segmentLength = 64 * scale;
+const segmentWidth = [68, 81, 84, 83, 77, 64, 51, 38, 32, 19, 19, 19].map(
+  (width) => width * scale,
+);
+const maxAngle = Math.PI / 8;
 
 export const init = (canvas: HTMLCanvasElement) => {
   const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
@@ -39,86 +38,133 @@ export const init = (canvas: HTMLCanvasElement) => {
     }
   });
 
-  const resolveChain = (target: Vector2, chain: Chain) => {
-    chain[0].joint
-      .subtract(target)
-      .normalize()
-      .multiplyScalar(segmentLength)
-      .add(target);
-    chain[0].angle = chain[0].joint.clone().subtract(target).angle;
-
-    for (let i = 1; i < chain.length; i += 1) {
-      const prevJoint = chain[i - 1].joint;
-      const curJoint = chain[i].joint;
-
-      const curAngle = curJoint.clone().subtract(prevJoint).angle;
-      const prevAngle = chain[i - 1].angle;
-
-      chain[i].angle = constrainAngle(curAngle, prevAngle, maxAngle);
-
-      const offset = Vector2.fromAngle(chain[i].angle).multiplyScalar(
-        segmentLength,
-      );
-      curJoint.copy(offset).add(prevJoint);
-    }
-  };
-
-  const constrainAngle = (
-    angle: number,
-    anchor: number,
-    constraint: number,
-  ) => {
-    return normalizeAngle(
-      anchor - clamp(relativeAngleDiff(angle, anchor), -constraint, constraint),
-    );
-  };
-
   const update = (_dt: number) => {
-    resolveChain(target, chain);
+    resolveChain(target, chain, segmentLength, maxAngle);
   };
 
+  //TODO: striped gradient for fins
   const draw = (chain: Chain) => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    ctx.strokeStyle = "#888";
-    ctx.fillStyle = "#222";
-    ctx.lineWidth = 3;
+    const maxBodyCurve = maxAngle * (segmentCount - 1);
+    let bodyCurve = 0;
+    for (let i = 1; i < chain.length; i++) {
+      bodyCurve += relativeAngleDiff(chain[i].angle, chain[i - 1].angle);
+    }
 
+    ctx.strokeStyle = "#AAA";
+    ctx.fillStyle = "#333";
+    ctx.lineWidth = 5;
+
+    const pectoralFinL = getSurfacePoint(chain[2], Math.PI / 2, 0);
+    const pectoralFinR = getSurfacePoint(chain[2], -Math.PI / 2, 0);
     ctx.beginPath();
-
-    drawSpline(
+    drawEllipse(
       ctx,
-      chain.map((segment) => segment.joint),
+      pectoralFinL,
+      segmentWidth[2] * 0.6,
+      segmentWidth[2] * 0.3,
+      chain[2].angle + Math.PI * 0.4,
+    );
+    drawEllipse(
+      ctx,
+      pectoralFinR,
+      segmentWidth[2] * 0.6,
+      segmentWidth[2] * 0.3,
+      chain[2].angle - Math.PI * 0.4,
     );
     ctx.stroke();
+    ctx.fill();
 
-    const outline = [getSurfacePoint(chain[0], Math.PI)];
+    const ventralFinL = getSurfacePoint(chain[7], Math.PI / 2, 0);
+    const bentralFinR = getSurfacePoint(chain[7], -Math.PI / 2, 0);
+    ctx.beginPath();
+    drawEllipse(
+      ctx,
+      ventralFinL,
+      segmentWidth[7] * 0.6,
+      segmentWidth[7] * 0.3,
+      chain[7].angle + Math.PI * 0.4,
+    );
+    drawEllipse(
+      ctx,
+      bentralFinR,
+      segmentWidth[7] * 0.6,
+      segmentWidth[7] * 0.3,
+      chain[7].angle - Math.PI * 0.4,
+    );
+    ctx.stroke();
+    ctx.fill();
 
-    for (let i = 0; i < chain.length; i++) {
+    const outline = [
+      getSurfacePoint(chain[0], Math.PI * 0.8),
+      getSurfacePoint(chain[0], Math.PI),
+      getSurfacePoint(chain[0], Math.PI * 1.2),
+    ];
+
+    for (let i = 0; i < bodyLength; i++) {
       outline.push(getSurfacePoint(chain[i], -Math.PI / 2));
       outline.unshift(getSurfacePoint(chain[i], Math.PI / 2));
     }
-    outline.push(getSurfacePoint(chain[chain.length - 1]));
-    outline.unshift(getSurfacePoint(chain[chain.length - 1]));
+    outline.push(getSurfacePoint(chain[bodyLength - 1]));
+    outline.unshift(getSurfacePoint(chain[bodyLength - 1]));
 
+    // caudal fin
+    const caudalFinTop = chain.slice(-3);
+    const caudalFinBottom = caudalFinTop.toReversed().map((point, i) => {
+      const maxW = segmentWidth[segmentWidth.length - 1];
+      return getSurfacePoint(
+        point,
+        Math.PI / 2,
+        -maxW + (maxW * (2.5 - i * 0.6) * bodyCurve) / maxBodyCurve,
+      );
+    });
+    const caudalFin: Vector2[] = caudalFinTop
+      .map((segment) => segment.joint)
+      .concat(caudalFinBottom);
     ctx.beginPath();
-    drawSpline(ctx, outline);
-
+    drawSpline(ctx, caudalFin);
+    ctx.fill();
+    ctx.beginPath();
+    drawSpline(ctx, caudalFin);
     ctx.stroke();
 
-    // for (let point of outline) {
-    //   ctx.fillStyle = "blue";
-    //   ctx.beginPath();
-    //   drawCircle(ctx, point.x, point.y, 2);
-    //   ctx.fill();
-    // }
+    ctx.fillStyle = "#222";
+    // body + outline
+    ctx.beginPath();
+    drawSpline(ctx, outline);
+    ctx.fill();
+    ctx.stroke();
+
+    // fin?
+    ctx.fillStyle = "#333";
+
+    const dorsalFin = [
+      chain[3].joint,
+      ...[4, 5].map((i) =>
+        getSurfacePoint(
+          chain[i],
+          Math.PI / 2,
+          -segmentWidth[i] +
+            (segmentWidth[i] * 0.05 * bodyCurve) / maxBodyCurve,
+        ),
+      ),
+
+      chain[6].joint,
+    ];
+    ctx.beginPath();
+    drawSpline(ctx, dorsalFin);
+    ctx.fill();
+    ctx.beginPath();
+    drawSpline(ctx, dorsalFin);
+    ctx.stroke();
 
     const eye1 = getSurfacePoint(chain[0], Math.PI / 2, -20);
     const eye2 = getSurfacePoint(chain[0], -Math.PI / 2, -20);
     ctx.fillStyle = "red";
     ctx.beginPath();
-    drawCircle(ctx, eye1.x, eye1.y, 3);
-    drawCircle(ctx, eye2.x, eye2.y, 3);
+    drawCircle(ctx, eye1, 3);
+    drawCircle(ctx, eye2, 3);
     ctx.fill();
   };
 

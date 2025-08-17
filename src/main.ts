@@ -3,7 +3,7 @@ import "./style.css";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
-    <canvas id="c" width="800" height="600"/>
+    <canvas id="c" width="1024" height="768"/>
   </div>
 `;
 
