@@ -21,7 +21,7 @@ export const init = (canvas: HTMLCanvasElement) => {
     angle: 0,
     width: segmentWidth[i],
   }));
-  const target = new Vector2(0, 0);
+  const target = new Vector2(0, -30);
 
   const updateTarget = (event: PointerEvent) => {
     const rect = canvas.getBoundingClientRect();
@@ -56,8 +56,12 @@ export const init = (canvas: HTMLCanvasElement) => {
     ctx.fillStyle = "#333";
     ctx.lineWidth = 5;
 
-    const pectoralFinL = getSurfacePoint(chain[2], Math.PI / 2, 0);
-    const pectoralFinR = getSurfacePoint(chain[2], -Math.PI / 2, 0);
+    const pectoralFinL = getSurfacePoint(chain[2], Math.PI / 2, chain[2].width);
+    const pectoralFinR = getSurfacePoint(
+      chain[2],
+      -Math.PI / 2,
+      chain[2].width,
+    );
     ctx.beginPath();
     drawEllipse(
       ctx,
@@ -76,8 +80,8 @@ export const init = (canvas: HTMLCanvasElement) => {
     ctx.stroke();
     ctx.fill();
 
-    const ventralFinL = getSurfacePoint(chain[7], Math.PI / 2, 0);
-    const bentralFinR = getSurfacePoint(chain[7], -Math.PI / 2, 0);
+    const ventralFinL = getSurfacePoint(chain[7], Math.PI / 2, chain[7].width);
+    const bentralFinR = getSurfacePoint(chain[7], -Math.PI / 2, chain[7].width);
     ctx.beginPath();
     drawEllipse(
       ctx,
@@ -97,17 +101,21 @@ export const init = (canvas: HTMLCanvasElement) => {
     ctx.fill();
 
     const outline = [
-      getSurfacePoint(chain[0], Math.PI * 0.8),
-      getSurfacePoint(chain[0], Math.PI),
-      getSurfacePoint(chain[0], Math.PI * 1.2),
+      getSurfacePoint(chain[0], Math.PI * 0.8, chain[0].width),
+      getSurfacePoint(chain[0], Math.PI, chain[0].width),
+      getSurfacePoint(chain[0], Math.PI * 1.2, chain[0].width),
     ];
 
     for (let i = 0; i < bodyLength; i++) {
-      outline.push(getSurfacePoint(chain[i], -Math.PI / 2));
-      outline.unshift(getSurfacePoint(chain[i], Math.PI / 2));
+      outline.push(getSurfacePoint(chain[i], -Math.PI / 2, chain[i].width));
+      outline.unshift(getSurfacePoint(chain[i], Math.PI / 2, chain[i].width));
     }
-    outline.push(getSurfacePoint(chain[bodyLength - 1]));
-    outline.unshift(getSurfacePoint(chain[bodyLength - 1]));
+    outline.push(
+      getSurfacePoint(chain[bodyLength - 1], 0, chain[bodyLength - 1].width),
+    );
+    outline.unshift(
+      getSurfacePoint(chain[bodyLength - 1], 0, chain[bodyLength - 1].width),
+    );
 
     // caudal fin
     const caudalFinTop = chain.slice(-3);
@@ -116,7 +124,7 @@ export const init = (canvas: HTMLCanvasElement) => {
       return getSurfacePoint(
         point,
         Math.PI / 2,
-        -maxW + (maxW * (2.5 - i * 0.6) * bodyCurve) / maxBodyCurve,
+        (maxW * (2.5 - i * 0.6) * bodyCurve) / maxBodyCurve,
       );
     });
     const caudalFin: Vector2[] = caudalFinTop
@@ -145,8 +153,7 @@ export const init = (canvas: HTMLCanvasElement) => {
         getSurfacePoint(
           chain[i],
           Math.PI / 2,
-          -segmentWidth[i] +
-            (segmentWidth[i] * 0.05 * bodyCurve) / maxBodyCurve,
+          (segmentWidth[i] * 0.05 * bodyCurve) / maxBodyCurve,
         ),
       ),
 
@@ -159,18 +166,50 @@ export const init = (canvas: HTMLCanvasElement) => {
     drawSpline(ctx, dorsalFin);
     ctx.stroke();
 
-    const eye1 = getSurfacePoint(chain[0], Math.PI / 2, -20);
-    const eye2 = getSurfacePoint(chain[0], -Math.PI / 2, -20);
-    ctx.fillStyle = "red";
-    ctx.beginPath();
-    drawCircle(ctx, eye1, 3);
-    drawCircle(ctx, eye2, 3);
-    ctx.fill();
+    [Math.PI, -Math.PI].map((direction) => {
+      const eye = getSurfacePoint(
+        chain[0],
+        direction / 2,
+        chain[0].width * 0.6,
+      );
+      ctx.fillStyle = "skyblue";
+      ctx.strokeStyle = "#AAA";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      drawEllipse(
+        ctx,
+        eye,
+        chain[0].width * 0.2,
+        chain[0].width * 0.25,
+        chain[0].angle - direction * 0.2,
+      );
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = "black";
+      ctx.strokeStyle = "white";
+      const eyeInner = getSurfacePoint(
+        chain[0],
+        direction / 2,
+        chain[0].width * 0.63,
+      );
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      drawEllipse(
+        ctx,
+        eyeInner,
+        chain[0].width * 0.1,
+        chain[0].width * 0.125,
+        chain[0].angle - direction * 0.2,
+      );
+      ctx.fill();
+      ctx.stroke();
+    });
   };
 
   const getSurfacePoint = (segment: Chain[number], angle = 0, offset = 0) => {
     return Vector2.fromAngle(normalizeAngle(segment.angle + angle))
-      .multiplyScalar(segment.width + offset)
+      .multiplyScalar(offset)
       .add(segment.joint);
   };
 
