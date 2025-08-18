@@ -11,7 +11,7 @@ const maxAngle = Math.PI / 8;
 
 export class Namazu {
   chain: Chain;
-  scale = 0.5;
+  scale = 0.2;
 
   constructor() {
     const that = this;
