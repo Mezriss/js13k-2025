@@ -1,4 +1,4 @@
-import { init } from "./kinematicsTest.ts";
+import { init } from "./game.ts";
 import "./style.css";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
