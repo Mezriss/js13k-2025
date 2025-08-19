@@ -1,10 +1,11 @@
 import { Namazu } from "./assets/namazu";
 import { Vector2 } from "./util/vector2";
 import { controls } from "./controls";
-import { acceleration, maxSpeed, velocityDecay } from "./const";
+import { acceleration, maxSpeed, rotationSpeed } from "./const";
+import { normalizeAngle, relativeAngleDiff } from "./util/util";
 
 type State = {
-  namazu: Namazu;
+  player: Namazu;
   target: Vector2;
   velocity: Vector2;
   ctx: CanvasRenderingContext2D;
@@ -15,7 +16,7 @@ let prevTime: number;
 
 export const init = (canvas: HTMLCanvasElement) => {
   state = {
-    namazu: new Namazu(),
+    player: new Namazu(),
     target: new Vector2(0, -30),
     velocity: new Vector2(0, 0),
     ctx: canvas.getContext("2d") as CanvasRenderingContext2D,
@@ -37,21 +38,44 @@ const update = (dt: number) => {
   const multiplier =
     Math.max(state.ctx.canvas.width, state.ctx.canvas.height) / 100;
 
-  const velocityUpdate = new Vector2(
+  const target = new Vector2(
     Math.sign(controls.right - controls.left),
     Math.sign(controls.down - controls.up),
-  )
-    .normalize()
-    .multiplyScalar(multiplier * maxSpeed * dt);
-  state.velocity.copy(velocityUpdate);
+  );
+
+  if (target.length) {
+    const currentDirection = normalizeAngle(
+      state.player.chain[0].angle + Math.PI,
+    );
+    const diff = relativeAngleDiff(currentDirection, target.angle);
+    const newDirection =
+      currentDirection +
+      Math.min(Math.abs(diff), Math.abs(dt * rotationSpeed)) * Math.sign(diff);
+
+    const speed = Math.min(
+      maxSpeed * multiplier * dt,
+      state.velocity.length + maxSpeed * acceleration * multiplier * dt,
+    );
+
+    state.velocity
+      .copy(Vector2.fromAngle(newDirection))
+      .normalize()
+      .multiplyScalar(speed);
+  } else {
+    const speed = Math.max(
+      0,
+      state.velocity.length - maxSpeed * acceleration * multiplier * dt,
+    );
+    state.velocity.normalize().multiplyScalar(speed);
+  }
 
   state.target.add(state.velocity);
 
-  state.namazu.update(state.target);
+  state.player.update(state.target);
 };
 
 const draw = (ctx: CanvasRenderingContext2D) => {
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-  state.namazu.draw(ctx);
+  state.player.draw(ctx);
 };
