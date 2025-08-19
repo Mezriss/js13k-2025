@@ -54,7 +54,7 @@ const update = (dt: number) => {
 
     const speed = Math.min(
       maxSpeed * multiplier * dt,
-      state.velocity.length + maxSpeed * acceleration * multiplier * dt,
+      state.velocity.length + acceleration * multiplier * dt * dt,
     );
 
     state.velocity
@@ -64,14 +64,25 @@ const update = (dt: number) => {
   } else {
     const speed = Math.max(
       0,
-      state.velocity.length - maxSpeed * acceleration * multiplier * dt,
+      state.velocity.length - acceleration * multiplier * dt * dt,
     );
     state.velocity.normalize().multiplyScalar(speed);
   }
 
   state.target.add(state.velocity);
+  ensureBounds(state.target);
 
   state.player.update(state.target);
+};
+
+const ensureBounds = (target: Vector2) => {
+  const cx = state.ctx.canvas.width / 2;
+  const cy = state.ctx.canvas.height / 2;
+
+  if (target.x < -cx) target.x = -cx;
+  if (target.y < -cy) target.y = -cy;
+  if (target.x > cx) target.x = cx;
+  if (target.y > cy) target.y = cy;
 };
 
 const draw = (ctx: CanvasRenderingContext2D) => {
