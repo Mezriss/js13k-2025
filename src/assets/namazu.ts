@@ -215,6 +215,6 @@ export class Namazu {
 
 const getSurfacePoint = (segment: Chain[number], angle = 0, offset = 0) => {
   return Vector2.fromAngle(normalizeAngle(segment.angle + angle))
-    .multiplyScalar(offset)
+    .scale(offset)
     .add(segment.joint);
 };

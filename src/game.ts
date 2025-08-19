@@ -1,13 +1,21 @@
 import { Namazu } from "./assets/namazu";
 import { Vector2 } from "./util/vector2";
 import { controls } from "./controls";
-import { acceleration, maxSpeed, rotationSpeed } from "./const";
+import {
+  acceleration,
+  maxSpeed,
+  minFrameDuration,
+  rotationSpeed,
+} from "./const";
 import { normalizeAngle, relativeAngleDiff } from "./util/util";
+import { Polygon } from "./assets/testObstacle";
+import { moveAndSlide } from "./util/collision";
 
 type State = {
   player: Namazu;
   target: Vector2;
   velocity: Vector2;
+  obstacles: Polygon[];
   ctx: CanvasRenderingContext2D;
 };
 
@@ -19,15 +27,25 @@ export const init = (canvas: HTMLCanvasElement) => {
     player: new Namazu(),
     target: new Vector2(0, -30),
     velocity: new Vector2(0, 0),
+    obstacles: [],
     ctx: canvas.getContext("2d") as CanvasRenderingContext2D,
   };
+
+  state.obstacles.push(
+    new Polygon(new Vector2(100, 100), [
+      new Vector2(0, 0),
+      new Vector2(100, 0),
+      new Vector2(100, 100),
+      new Vector2(0, 100),
+    ]),
+  );
 
   prevTime = Number(document.timeline.currentTime);
   loop(prevTime);
 };
 
 const loop: FrameRequestCallback = (time) => {
-  const dt = (time - prevTime) / 1000;
+  const dt = Math.min((time - prevTime) / 1000, minFrameDuration);
   prevTime = time;
   update(dt);
   draw(state.ctx);
@@ -60,16 +78,20 @@ const update = (dt: number) => {
     state.velocity
       .copy(Vector2.fromAngle(newDirection))
       .normalize()
-      .multiplyScalar(speed);
+      .scale(speed);
   } else {
     const speed = Math.max(
       0,
       state.velocity.length - acceleration * multiplier * dt * dt,
     );
-    state.velocity.normalize().multiplyScalar(speed);
+    state.velocity.normalize().scale(speed);
   }
 
-  state.target.add(state.velocity);
+  moveAndSlide(state.target, state.velocity, state.obstacles);
+
+  state.target.copy(
+    moveAndSlide(state.target, state.velocity, state.obstacles),
+  );
   ensureBounds(state.target);
 
   state.player.update(state.target);
@@ -87,6 +109,8 @@ const ensureBounds = (target: Vector2) => {
 
 const draw = (ctx: CanvasRenderingContext2D) => {
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+  state.obstacles.forEach((obstacle) => obstacle.debugDraw(ctx));
 
   state.player.draw(ctx);
 };

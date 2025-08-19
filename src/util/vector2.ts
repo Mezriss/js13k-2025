@@ -19,14 +19,10 @@ export class Vector2 {
     return this;
   }
 
-  multiplyScalar(scalar: number): Vector2 {
+  scale(scalar: number): Vector2 {
     this.x *= scalar;
     this.y *= scalar;
     return this;
-  }
-
-  divideScalar(scalar: number): Vector2 {
-    return this.multiplyScalar(1 / scalar);
   }
 
   get length(): number {
@@ -34,11 +30,15 @@ export class Vector2 {
   }
 
   normalize(): Vector2 {
-    return this.divideScalar(this.length || 1);
+    return this.scale(1 / (this.length || 1));
   }
 
   get angle(): number {
     return Math.atan2(-this.y, -this.x) + Math.PI;
+  }
+
+  dot(other: Vector2): number {
+    return this.x * other.x + this.y * other.y;
   }
 
   rotateAround(center: Vector2, angle: number) {

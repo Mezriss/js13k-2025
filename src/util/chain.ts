@@ -13,11 +13,7 @@ export const resolveChain = (
   segmentLength: number,
   maxAngle: number,
 ) => {
-  chain[0].joint
-    .subtract(target)
-    .normalize()
-    .multiplyScalar(segmentLength)
-    .add(target);
+  chain[0].joint.subtract(target).normalize().scale(segmentLength).add(target);
   chain[0].angle = chain[0].joint.clone().subtract(target).angle;
 
   for (let i = 1; i < chain.length; i += 1) {
@@ -29,9 +25,7 @@ export const resolveChain = (
 
     chain[i].angle = constrainAngle(curAngle, prevAngle, maxAngle);
 
-    const offset = Vector2.fromAngle(chain[i].angle).multiplyScalar(
-      segmentLength,
-    );
+    const offset = Vector2.fromAngle(chain[i].angle).scale(segmentLength);
     curJoint.copy(offset).add(prevJoint);
   }
 };
