@@ -42,6 +42,8 @@ export const init = (canvas: HTMLCanvasElement) => {
 
   prevTime = Number(document.timeline.currentTime);
   loop(prevTime);
+
+  state.ctx.translate(state.ctx.canvas.width / 2, state.ctx.canvas.height / 2);
 };
 
 const loop: FrameRequestCallback = (time) => {
@@ -108,7 +110,12 @@ const ensureBounds = (target: Vector2) => {
 };
 
 const draw = (ctx: CanvasRenderingContext2D) => {
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  ctx.clearRect(
+    -state.ctx.canvas.width / 2,
+    -state.ctx.canvas.height / 2,
+    ctx.canvas.width,
+    ctx.canvas.height,
+  );
 
   state.obstacles.forEach((obstacle) => obstacle.debugDraw(ctx));
 

@@ -24,14 +24,12 @@ export class Polygon {
   }
 
   debugDraw(ctx: CanvasRenderingContext2D) {
-    const cx = ctx.canvas.width / 2;
-    const cy = ctx.canvas.height / 2;
     ctx.beginPath();
     ctx.strokeStyle = "red";
     ctx.lineWidth = 2;
-    ctx.moveTo(cx + this.vertices[0].x, cy + this.vertices[0].y);
+    ctx.moveTo(this.vertices[0].x, this.vertices[0].y);
     for (const point of this.vertices) {
-      ctx.lineTo(cx + point.x, cy + point.y);
+      ctx.lineTo(point.x, point.y);
     }
     ctx.closePath();
     ctx.stroke();
