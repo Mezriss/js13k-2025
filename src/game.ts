@@ -1,21 +1,17 @@
-import { Namazu } from "./assets/namazu";
+import { Namazu } from "./entities/namazu";
 import { Vector2 } from "./util/vector2";
-import { controls } from "./controls";
-import {
-  acceleration,
-  maxSpeed,
-  minFrameDuration,
-  rotationSpeed,
-} from "./const";
-import { normalizeAngle, relativeAngleDiff } from "./util/util";
-import { Polygon } from "./assets/testObstacle";
-import { moveAndSlide } from "./util/collision";
+import { minFrameDuration } from "./const";
+import { Polygon } from "./entities/polygon";
+import { updatePlayer } from "./player";
+import type { Attack } from "./entities/attack";
+import { updateThreats } from "./threatManager";
 
-type State = {
+export type State = {
   player: Namazu;
   target: Vector2;
   velocity: Vector2;
   obstacles: Polygon[];
+  attacks: Attack[];
   ctx: CanvasRenderingContext2D;
 };
 
@@ -28,16 +24,21 @@ export const init = (canvas: HTMLCanvasElement) => {
     target: new Vector2(0, -30),
     velocity: new Vector2(0, 0),
     obstacles: [],
+    attacks: [],
     ctx: canvas.getContext("2d") as CanvasRenderingContext2D,
   };
 
   state.obstacles.push(
-    new Polygon(new Vector2(100, 100), [
-      new Vector2(0, 0),
-      new Vector2(100, 0),
+    new Polygon(
       new Vector2(100, 100),
-      new Vector2(0, 100),
-    ]),
+      [
+        new Vector2(0, 0),
+        new Vector2(100, 0),
+        new Vector2(100, 100),
+        new Vector2(0, 100),
+      ],
+      Math.PI / 4,
+    ),
   );
 
   prevTime = Number(document.timeline.currentTime);
@@ -55,58 +56,8 @@ const loop: FrameRequestCallback = (time) => {
 };
 
 const update = (dt: number) => {
-  const multiplier =
-    Math.max(state.ctx.canvas.width, state.ctx.canvas.height) / 100;
-
-  const target = new Vector2(
-    Math.sign(controls.right - controls.left),
-    Math.sign(controls.down - controls.up),
-  );
-
-  if (target.length) {
-    const currentDirection = normalizeAngle(
-      state.player.chain[0].angle + Math.PI,
-    );
-    const diff = relativeAngleDiff(currentDirection, target.angle);
-    const newDirection =
-      currentDirection +
-      Math.min(Math.abs(diff), Math.abs(dt * rotationSpeed)) * Math.sign(diff);
-
-    const speed = Math.min(
-      maxSpeed * multiplier * dt,
-      state.velocity.length + acceleration * multiplier * dt * dt,
-    );
-
-    state.velocity
-      .copy(Vector2.fromAngle(newDirection))
-      .normalize()
-      .scale(speed);
-  } else {
-    const speed = Math.max(
-      0,
-      state.velocity.length - acceleration * multiplier * dt * dt,
-    );
-    state.velocity.normalize().scale(speed);
-  }
-
-  moveAndSlide(state.target, state.velocity, state.obstacles);
-
-  state.target.copy(
-    moveAndSlide(state.target, state.velocity, state.obstacles),
-  );
-  ensureBounds(state.target);
-
-  state.player.update(state.target);
-};
-
-const ensureBounds = (target: Vector2) => {
-  const cx = state.ctx.canvas.width / 2;
-  const cy = state.ctx.canvas.height / 2;
-
-  if (target.x < -cx) target.x = -cx;
-  if (target.y < -cy) target.y = -cy;
-  if (target.x > cx) target.x = cx;
-  if (target.y > cy) target.y = cy;
+  updatePlayer(state, dt);
+  updateThreats(state, dt);
 };
 
 const draw = (ctx: CanvasRenderingContext2D) => {
@@ -118,6 +69,7 @@ const draw = (ctx: CanvasRenderingContext2D) => {
   );
 
   state.obstacles.forEach((obstacle) => obstacle.debugDraw(ctx));
+  state.attacks.forEach((attack) => attack.draw(ctx));
 
   state.player.draw(ctx);
 };

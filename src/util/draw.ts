@@ -1,5 +1,31 @@
 import type { Vector2 } from "./vector2";
 
+let canvasW = 1;
+let canvasH = 1;
+let canvasMax = 1;
+let canvasMin = 1;
+
+const updateUnits = () => {
+  const canvas = (document.getElementById("c") as HTMLCanvasElement) || {
+    width: 0,
+    height: 0,
+  };
+  canvasW = canvas.width;
+  canvasH = canvas.height;
+  canvasMax = Math.max(canvasW, canvasH);
+  canvasMin = Math.min(canvasW, canvasH);
+};
+
+window.addEventListener("load", () => {
+  updateUnits();
+  window.addEventListener("resize", updateUnits);
+});
+
+export const cw = (n: number) => n * canvasW;
+export const ch = (n: number) => n * canvasH;
+export const cmax = (n: number) => n * canvasMax;
+export const cmin = (n: number) => n * canvasMin;
+
 // Catmull–Rom spline
 export function drawSpline(
   ctx: CanvasRenderingContext2D,
