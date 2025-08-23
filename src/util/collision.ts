@@ -1,4 +1,4 @@
-import type { AABB, Polygon } from "../assets/testObstacle";
+import type { AABB, Polygon } from "../entities/polygon";
 import { Vector2 } from "./vector2";
 
 type IntersectionResult = {
@@ -39,16 +39,6 @@ function getLineSegmentIntersection(
   return null;
 }
 
-function checkOverlap(a: AABB, b: AABB): boolean {
-  if (a.min.x > b.max.x || b.min.x > a.max.x) {
-    return false;
-  }
-  if (a.min.y > b.max.y || b.min.y > a.max.y) {
-    return false;
-  }
-  return true;
-}
-
 function getMovementAABB(start: Vector2, end: Vector2): AABB {
   return {
     min: new Vector2(Math.min(start.x, end.x), Math.min(start.y, end.y)),
@@ -66,7 +56,7 @@ function findClosestCollision(
   const movementAABB = getMovementAABB(startPos, endPos);
 
   for (const polygon of polygons) {
-    if (!checkOverlap(movementAABB, polygon.aabb)) {
+    if (!checkAABBOverlap(movementAABB, polygon.aabb)) {
       continue;
     }
 
@@ -147,4 +137,92 @@ export function moveAndSlide(
   }
 
   return currentPosition;
+}
+
+function getClosestPointOnSegment(
+  point: Vector2,
+  p1: Vector2,
+  p2: Vector2,
+): Vector2 {
+  const edgeVector = p2.clone().subtract(p1);
+  const pointVector = point.clone().subtract(p1);
+
+  const edgeLengthSq = edgeVector.lengthSquared;
+  if (edgeLengthSq === 0) {
+    return p1;
+  }
+
+  // Project pointVector onto edgeVector to find the 't' parameter
+  const t = Math.max(
+    0,
+    Math.min(1, pointVector.dot(edgeVector) / edgeLengthSq),
+  );
+
+  // The closest point is p1 + t * edgeVector
+  return p1.clone().add(edgeVector.scale(t));
+}
+
+/**
+ * Checks if a point is inside a convex polygon (vertices ordered clockwise).
+ * Uses the "left-of-edge" test. For a CW polygon, the point must be to the right of all edges.
+ */
+function isPointInPolygon(point: Vector2, polygon: Polygon): boolean {
+  const vertices = polygon.vertices;
+  for (let i = 0; i < vertices.length; i++) {
+    const p1 = vertices[i];
+    const p2 = vertices[(i + 1) % vertices.length];
+
+    const edge = p2.clone().subtract(p1);
+    const pointVec = point.clone().subtract(p1);
+
+    // Using 2D cross-product. For a CW polygon, a point inside
+    // will result in a positive or zero cross product for all edges.
+    const crossProduct = edge.x * pointVec.y - edge.y * pointVec.x;
+    if (crossProduct < 0) {
+      return false; // Point is to the "left" of an edge, so it's outside
+    }
+  }
+  return true;
+}
+
+export function checkCirclePolygonCollision(
+  center: Vector2,
+  radius: number,
+  polygon: Polygon,
+): boolean {
+  const vertices = polygon.vertices;
+
+  let minDistanceSq = Infinity;
+
+  for (let i = 0; i < vertices.length; i++) {
+    const p1 = vertices[i];
+    const p2 = vertices[(i + 1) % vertices.length];
+
+    const closestPointOnSegment = getClosestPointOnSegment(center, p1, p2);
+
+    const distanceSq = center
+      .clone()
+      .subtract(closestPointOnSegment).lengthSquared;
+
+    if (distanceSq < minDistanceSq) {
+      minDistanceSq = distanceSq;
+    }
+  }
+
+  const distance = Math.sqrt(minDistanceSq);
+
+  // extra check for a circle completely inside a polygon
+  if (distance > radius) isPointInPolygon(center, polygon);
+
+  return true;
+}
+
+export function checkAABBOverlap(a: AABB, b: AABB): boolean {
+  if (a.min.x > b.max.x || b.min.x > a.max.x) {
+    return false;
+  }
+  if (a.min.y > b.max.y || b.min.y > a.max.y) {
+    return false;
+  }
+  return true;
 }

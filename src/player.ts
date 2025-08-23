@@ -16,7 +16,7 @@ export function updatePlayer(state: State, dt: number) {
 
   if (target.length) {
     const currentDirection = normalizeAngle(
-      state.player.chain[0].angle + Math.PI,
+      state.player.body.chain[0].angle + Math.PI,
     );
     const diff = relativeAngleDiff(currentDirection, target.angle);
     const newDirection =
@@ -25,37 +25,37 @@ export function updatePlayer(state: State, dt: number) {
 
     const speed = Math.min(
       maxSpeed * multiplier * dt,
-      state.velocity.length + acceleration * multiplier * dt * dt,
+      state.player.velocity.length + acceleration * multiplier * dt * dt,
     );
 
-    state.velocity
+    state.player.velocity
       .copy(Vector2.fromAngle(newDirection))
       .normalize()
       .scale(speed);
   } else {
     const speed = Math.max(
       0,
-      state.velocity.length - acceleration * multiplier * dt * dt,
+      state.player.velocity.length - acceleration * multiplier * dt * dt,
     );
-    state.velocity.normalize().scale(speed);
+    state.player.velocity.normalize().scale(speed);
   }
 
-  moveAndSlide(state.target, state.velocity, state.obstacles);
+  moveAndSlide(state.player.target, state.player.velocity, state.obstacles);
 
-  state.target.copy(
-    moveAndSlide(state.target, state.velocity, state.obstacles),
+  state.player.target.copy(
+    moveAndSlide(state.player.target, state.player.velocity, state.obstacles),
   );
   ensureBounds(state);
 
-  state.player.update(state.target);
+  state.player.body.update(state.player.target);
 }
 
 const ensureBounds = (state: State) => {
   const cx = state.ctx.canvas.width / 2;
   const cy = state.ctx.canvas.height / 2;
 
-  if (state.target.x < -cx) state.target.x = -cx;
-  if (state.target.y < -cy) state.target.y = -cy;
-  if (state.target.x > cx) state.target.x = cx;
-  if (state.target.y > cy) state.target.y = cy;
+  if (state.player.target.x < -cx) state.player.target.x = -cx;
+  if (state.player.target.y < -cy) state.player.target.y = -cy;
+  if (state.player.target.x > cx) state.player.target.x = cx;
+  if (state.player.target.y > cy) state.player.target.y = cy;
 };

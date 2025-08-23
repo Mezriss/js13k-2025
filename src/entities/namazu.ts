@@ -6,7 +6,7 @@ import { Vector2 } from "../util/vector2";
 const segmentCount = 12;
 const bodyLength = 10;
 const segmentLength = 45;
-const segmentWidth = [49, 56, 58, 58, 53, 44, 35, 26, 22, 13, 13, 13];
+const segmentRadius = [49, 56, 58, 58, 53, 44, 35, 26, 22, 13, 13, 13];
 const maxAngle = Math.PI / 8;
 
 export class Namazu {
@@ -18,8 +18,8 @@ export class Namazu {
     this.chain = Array.from({ length: segmentCount }, (_e, i) => ({
       joint: new Vector2(0, segmentLength * i),
       angle: 0,
-      get width(): number {
-        return segmentWidth[i] * that.scale;
+      get radius(): number {
+        return segmentRadius[i] * that.scale;
       },
     }));
   }
@@ -47,26 +47,26 @@ export class Namazu {
     const pectoralFinL = getSurfacePoint(
       this.chain[2],
       Math.PI / 2,
-      this.chain[2].width,
+      this.chain[2].radius,
     );
     const pectoralFinR = getSurfacePoint(
       this.chain[2],
       -Math.PI / 2,
-      this.chain[2].width,
+      this.chain[2].radius,
     );
     ctx.beginPath();
     drawEllipse(
       ctx,
       pectoralFinL,
-      this.chain[2].width * 0.6,
-      this.chain[2].width * 0.3,
+      this.chain[2].radius * 0.6,
+      this.chain[2].radius * 0.3,
       this.chain[2].angle + Math.PI * 0.4,
     );
     drawEllipse(
       ctx,
       pectoralFinR,
-      this.chain[2].width * 0.6,
-      this.chain[2].width * 0.3,
+      this.chain[2].radius * 0.6,
+      this.chain[2].radius * 0.3,
       this.chain[2].angle - Math.PI * 0.4,
     );
     ctx.stroke();
@@ -75,26 +75,26 @@ export class Namazu {
     const ventralFinL = getSurfacePoint(
       this.chain[7],
       Math.PI / 2,
-      this.chain[7].width,
+      this.chain[7].radius,
     );
     const bentralFinR = getSurfacePoint(
       this.chain[7],
       -Math.PI / 2,
-      this.chain[7].width,
+      this.chain[7].radius,
     );
     ctx.beginPath();
     drawEllipse(
       ctx,
       ventralFinL,
-      this.chain[7].width * 0.6,
-      this.chain[7].width * 0.3,
+      this.chain[7].radius * 0.6,
+      this.chain[7].radius * 0.3,
       this.chain[7].angle + Math.PI * 0.4,
     );
     drawEllipse(
       ctx,
       bentralFinR,
-      this.chain[7].width * 0.6,
-      this.chain[7].width * 0.3,
+      this.chain[7].radius * 0.6,
+      this.chain[7].radius * 0.3,
       this.chain[7].angle - Math.PI * 0.4,
     );
     ctx.stroke();
@@ -103,7 +103,7 @@ export class Namazu {
     // caudal fin
     const caudalFinTop = this.chain.slice(-3);
     const caudalFinBottom = caudalFinTop.toReversed().map((point, i) => {
-      const maxW = this.chain[this.chain.length - 1].width;
+      const maxW = this.chain[this.chain.length - 1].radius;
       return getSurfacePoint(
         point,
         Math.PI / 2,
@@ -121,29 +121,29 @@ export class Namazu {
     ctx.stroke();
 
     const outline = [0.8, 1, 1.2].map((r) =>
-      getSurfacePoint(this.chain[0], Math.PI * r, this.chain[0].width),
+      getSurfacePoint(this.chain[0], Math.PI * r, this.chain[0].radius),
     );
 
     for (let i = 0; i < bodyLength; i++) {
       outline.push(
-        getSurfacePoint(this.chain[i], -Math.PI / 2, this.chain[i].width),
+        getSurfacePoint(this.chain[i], -Math.PI / 2, this.chain[i].radius),
       );
       outline.unshift(
-        getSurfacePoint(this.chain[i], Math.PI / 2, this.chain[i].width),
+        getSurfacePoint(this.chain[i], Math.PI / 2, this.chain[i].radius),
       );
     }
     outline.push(
       getSurfacePoint(
         this.chain[bodyLength - 1],
         0,
-        this.chain[bodyLength - 1].width,
+        this.chain[bodyLength - 1].radius,
       ),
     );
     outline.unshift(
       getSurfacePoint(
         this.chain[bodyLength - 1],
         0,
-        this.chain[bodyLength - 1].width,
+        this.chain[bodyLength - 1].radius,
       ),
     );
     ctx.fillStyle = "#222";
@@ -158,7 +158,7 @@ export class Namazu {
         getSurfacePoint(
           this.chain[i],
           Math.PI / 2,
-          (this.chain[i].width * 0.05 * bodyCurve) / maxBodyCurve,
+          (this.chain[i].radius * 0.05 * bodyCurve) / maxBodyCurve,
         ),
       ),
       this.chain[6].joint,
@@ -175,17 +175,17 @@ export class Namazu {
       const eye = getSurfacePoint(
         this.chain[0],
         direction / 2,
-        this.chain[0].width * 0.6,
+        this.chain[0].radius * 0.6,
       );
       ctx.fillStyle = "skyblue";
       ctx.strokeStyle = "#AAA";
-      ctx.lineWidth = this.chain[0].width * 0.05;
+      ctx.lineWidth = this.chain[0].radius * 0.05;
       ctx.beginPath();
       drawEllipse(
         ctx,
         eye,
-        this.chain[0].width * 0.2,
-        this.chain[0].width * 0.25,
+        this.chain[0].radius * 0.2,
+        this.chain[0].radius * 0.25,
         this.chain[0].angle - direction * 0.2,
       );
       ctx.fill();
@@ -196,15 +196,15 @@ export class Namazu {
       const eyeInner = getSurfacePoint(
         this.chain[0],
         direction / 2,
-        this.chain[0].width * 0.63,
+        this.chain[0].radius * 0.63,
       );
-      ctx.lineWidth = this.chain[0].width * 0.07;
+      ctx.lineWidth = this.chain[0].radius * 0.07;
       ctx.beginPath();
       drawEllipse(
         ctx,
         eyeInner,
-        this.chain[0].width * 0.1,
-        this.chain[0].width * 0.125,
+        this.chain[0].radius * 0.1,
+        this.chain[0].radius * 0.125,
         this.chain[0].angle - direction * 0.2,
       );
       ctx.fill();

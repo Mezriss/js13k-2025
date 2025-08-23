@@ -29,6 +29,10 @@ export class Vector2 {
     return Math.hypot(this.x, this.y);
   }
 
+  get lengthSquared(): number {
+    return this.x * this.x + this.y * this.y;
+  }
+
   normalize(): Vector2 {
     return this.scale(1 / (this.length || 1));
   }

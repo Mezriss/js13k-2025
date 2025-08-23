@@ -1,10 +1,11 @@
+import type { AABB } from "../entities/polygon";
 import { clamp, normalizeAngle, relativeAngleDiff } from "./util";
 import { Vector2 } from "./vector2";
 
 export type Chain = {
   joint: Vector2;
   angle: number;
-  width: number;
+  radius: number;
 }[];
 
 export const resolveChain = (
@@ -34,4 +35,22 @@ const constrainAngle = (angle: number, anchor: number, constraint: number) => {
   return normalizeAngle(
     anchor - clamp(relativeAngleDiff(angle, anchor), -constraint, constraint),
   );
+};
+
+export const getChainAABB = (chain: Chain) => {
+  const aabb: AABB = {
+    min: new Vector2(Infinity, Infinity),
+    max: new Vector2(-Infinity, -Infinity),
+  };
+
+  for (const segment of chain) {
+    const { joint, radius } = segment;
+
+    aabb.min.x = Math.min(aabb.min.x, joint.x - radius);
+    aabb.min.y = Math.min(aabb.min.y, joint.y - radius);
+    aabb.max.x = Math.max(aabb.max.x, joint.x + radius);
+    aabb.max.y = Math.max(aabb.max.y, joint.y + radius);
+  }
+
+  return aabb;
 };

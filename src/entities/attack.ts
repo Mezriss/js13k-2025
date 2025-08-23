@@ -1,11 +1,13 @@
 import type { Polygon } from "./polygon";
 
 export class Attack {
+  shape: Polygon;
   hintDuration: number;
   t = 0;
   over = false;
 
-  constructor(hintDuration: number) {
+  constructor(shape: Polygon, hintDuration: number) {
+    this.shape = shape;
     this.hintDuration = hintDuration;
   }
 
@@ -17,11 +19,8 @@ export class Attack {
 }
 
 export class StoneAttack extends Attack {
-  shape: Polygon;
-
   constructor(shape: Polygon, hintDuration: number) {
-    super(hintDuration);
-    this.shape = shape;
+    super(shape, hintDuration);
   }
 
   update(dt: number) {

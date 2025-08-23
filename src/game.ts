@@ -7,9 +7,7 @@ import type { Attack } from "./entities/attack";
 import { updateThreats } from "./threatManager";
 
 export type State = {
-  player: Namazu;
-  target: Vector2;
-  velocity: Vector2;
+  player: { body: Namazu; target: Vector2; velocity: Vector2; hp: number };
   obstacles: Polygon[];
   attacks: Attack[];
   ctx: CanvasRenderingContext2D;
@@ -20,9 +18,12 @@ let prevTime: number;
 
 export const init = (canvas: HTMLCanvasElement) => {
   state = {
-    player: new Namazu(),
-    target: new Vector2(0, -30),
-    velocity: new Vector2(0, 0),
+    player: {
+      body: new Namazu(),
+      target: new Vector2(0, -30),
+      velocity: new Vector2(0, 0),
+      hp: 3,
+    },
     obstacles: [],
     attacks: [],
     ctx: canvas.getContext("2d") as CanvasRenderingContext2D,
@@ -71,5 +72,5 @@ const draw = (ctx: CanvasRenderingContext2D) => {
   state.obstacles.forEach((obstacle) => obstacle.debugDraw(ctx));
   state.attacks.forEach((attack) => attack.draw(ctx));
 
-  state.player.draw(ctx);
+  state.player.body.draw(ctx);
 };

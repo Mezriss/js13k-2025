@@ -1,6 +1,11 @@
 import { StoneAttack } from "./entities/attack";
-import { Polygon } from "./entities/polygon";
+import { Polygon, type AABB } from "./entities/polygon";
 import type { State } from "./game";
+import { getChainAABB } from "./util/chain";
+import {
+  checkAABBOverlap,
+  checkCirclePolygonCollision,
+} from "./util/collision";
 import { Vector2 } from "./util/vector2";
 
 const testBoulder = [
@@ -29,9 +34,30 @@ export function updateThreats(state: State, dt: number) {
     );
   }
 
+  let chainAABB: AABB | undefined;
+
   state.attacks.forEach((attack) => {
     attack.update(dt);
     if (attack.over) {
+      if (!chainAABB) {
+        chainAABB = getChainAABB(state.player.body.chain);
+      }
+      if (checkAABBOverlap(chainAABB, attack.shape.aabb)) {
+        // todo collision check
+        for (const segment of state.player.body.chain) {
+          const collided = checkCirclePolygonCollision(
+            segment.joint,
+            segment.radius,
+            attack.shape,
+          );
+          if (collided) {
+            state.player.hp -= 1;
+            console.info("hit");
+            break;
+          }
+        }
+      }
+
       state.attacks.splice(state.attacks.indexOf(attack), 1);
     }
   });
