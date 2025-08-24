@@ -1,6 +1,6 @@
 import { Namazu } from "./entities/namazu";
 import { Vector2 } from "./util/vector2";
-import { minFrameDuration } from "./const";
+import { minFrameDuration, screenShakeDuration } from "./const";
 import { Polygon } from "./entities/polygon";
 import { updatePlayer } from "./player";
 import type { Attack } from "./entities/attack";
@@ -10,6 +10,9 @@ export type State = {
   player: { body: Namazu; target: Vector2; velocity: Vector2; hp: number };
   obstacles: Polygon[];
   attacks: Attack[];
+  animations: {
+    screenShake: number;
+  };
   ctx: CanvasRenderingContext2D;
 };
 
@@ -26,6 +29,9 @@ export const init = (canvas: HTMLCanvasElement) => {
     },
     obstacles: [],
     attacks: [],
+    animations: {
+      screenShake: 0,
+    },
     ctx: canvas.getContext("2d") as CanvasRenderingContext2D,
   };
 
@@ -48,6 +54,13 @@ export const init = (canvas: HTMLCanvasElement) => {
   state.ctx.translate(state.ctx.canvas.width / 2, state.ctx.canvas.height / 2);
 };
 
+const updateAnimations = (state: State, dt: number) => {
+  state.animations.screenShake = Math.max(
+    0,
+    state.animations.screenShake - dt / screenShakeDuration,
+  );
+};
+
 const loop: FrameRequestCallback = (time) => {
   const dt = Math.min((time - prevTime) / 1000, minFrameDuration);
   prevTime = time;
@@ -59,18 +72,29 @@ const loop: FrameRequestCallback = (time) => {
 const update = (dt: number) => {
   updatePlayer(state, dt);
   updateThreats(state, dt);
+  updateAnimations(state, dt);
 };
 
 const draw = (ctx: CanvasRenderingContext2D) => {
   ctx.clearRect(
-    -state.ctx.canvas.width / 2,
-    -state.ctx.canvas.height / 2,
+    -ctx.canvas.width / 2,
+    -ctx.canvas.height / 2,
     ctx.canvas.width,
     ctx.canvas.height,
   );
 
+  ctx.save();
+
+  if (state.animations.screenShake > 0) {
+    const shakeMagnitude = state.animations.screenShake * 10;
+    const offsetX = (Math.random() * 2 - 1) * shakeMagnitude;
+    const offsetY = (Math.random() * 2 - 1) * shakeMagnitude;
+    ctx.translate(offsetX, offsetY);
+  }
+
   state.obstacles.forEach((obstacle) => obstacle.debugDraw(ctx));
   state.attacks.forEach((attack) => attack.draw(ctx));
-
   state.player.body.draw(ctx);
+
+  ctx.restore();
 };
