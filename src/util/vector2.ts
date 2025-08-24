@@ -25,6 +25,12 @@ export class Vector2 {
     return this;
   }
 
+  multiply(other: Vector2): Vector2 {
+    this.x *= other.x;
+    this.y *= other.y;
+    return this;
+  }
+
   get length(): number {
     return Math.hypot(this.x, this.y);
   }

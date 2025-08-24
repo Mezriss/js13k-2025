@@ -1,4 +1,4 @@
-import { StoneAttack } from "./entities/attack";
+import { SpearAttack, StoneAttack } from "./entities/attack";
 import { Polygon, type AABB } from "./entities/polygon";
 import type { State } from "./game";
 import { getChainAABB } from "./util/chain";
@@ -19,6 +19,15 @@ const testBoulder = [
   [-3, -1],
 ].map((p) => new Vector2(...(p as [number, number])));
 
+const testRectangle = [
+  [0, 0],
+  [1, 0],
+  [1, 1],
+  [0, 1],
+].map((p) =>
+  new Vector2(...(p as [number, number])).multiply(new Vector2(1000, 30)),
+);
+
 export function updateThreats(state: State, dt: number) {
   while (state.attacks.length < 3) {
     state.attacks.push(
@@ -28,6 +37,16 @@ export function updateThreats(state: State, dt: number) {
           testBoulder,
           0,
           10,
+        ),
+        1 + Math.random() * 0.5,
+      ),
+    );
+    state.attacks.push(
+      new SpearAttack(
+        new Polygon(
+          new Vector2(Math.random() * 400 - 200, -200),
+          testRectangle,
+          1 + Math.random() * 0.5,
         ),
         1 + Math.random() * 0.5,
       ),
@@ -44,7 +63,8 @@ export function updateThreats(state: State, dt: number) {
       }
       if (checkAABBOverlap(chainAABB, attack.shape.aabb)) {
         // todo collision check
-        for (const segment of state.player.body.chain) {
+        for (let i = 0; i < state.player.body.bodyLength; i++) {
+          const segment = state.player.body.chain[i];
           const collided = checkCirclePolygonCollision(
             segment.joint,
             segment.radius,

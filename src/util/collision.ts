@@ -212,7 +212,7 @@ export function checkCirclePolygonCollision(
   const distance = Math.sqrt(minDistanceSq);
 
   // extra check for a circle completely inside a polygon
-  if (distance > radius) isPointInPolygon(center, polygon);
+  if (distance > radius) return isPointInPolygon(center, polygon);
 
   return true;
 }

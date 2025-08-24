@@ -3,8 +3,6 @@ import { drawEllipse, drawSpline } from "../util/draw";
 import { normalizeAngle, relativeAngleDiff } from "../util/util";
 import { Vector2 } from "../util/vector2";
 
-const segmentCount = 12;
-const bodyLength = 10;
 const segmentLength = 45;
 const segmentRadius = [49, 56, 58, 58, 53, 44, 35, 26, 22, 13, 13, 13];
 const maxAngle = Math.PI / 8;
@@ -12,10 +10,12 @@ const maxAngle = Math.PI / 8;
 export class Namazu {
   chain: Chain;
   scale = 0.2;
+  segmentCount = 12;
+  bodyLength = 10;
 
   constructor() {
     const that = this;
-    this.chain = Array.from({ length: segmentCount }, (_e, i) => ({
+    this.chain = Array.from({ length: this.segmentCount }, (_e, i) => ({
       joint: new Vector2(0, segmentLength * i),
       angle: 0,
       get radius(): number {
@@ -31,7 +31,7 @@ export class Namazu {
   draw(ctx: CanvasRenderingContext2D) {
     //TODO: striped gradient for fins
 
-    const maxBodyCurve = maxAngle * (segmentCount - 1);
+    const maxBodyCurve = maxAngle * (this.segmentCount - 1);
     let bodyCurve = 0;
     for (let i = 1; i < this.chain.length; i++) {
       bodyCurve += relativeAngleDiff(
@@ -124,7 +124,7 @@ export class Namazu {
       getSurfacePoint(this.chain[0], Math.PI * r, this.chain[0].radius),
     );
 
-    for (let i = 0; i < bodyLength; i++) {
+    for (let i = 0; i < this.bodyLength; i++) {
       outline.push(
         getSurfacePoint(this.chain[i], -Math.PI / 2, this.chain[i].radius),
       );
@@ -134,16 +134,16 @@ export class Namazu {
     }
     outline.push(
       getSurfacePoint(
-        this.chain[bodyLength - 1],
+        this.chain[this.bodyLength - 1],
         0,
-        this.chain[bodyLength - 1].radius,
+        this.chain[this.bodyLength - 1].radius,
       ),
     );
     outline.unshift(
       getSurfacePoint(
-        this.chain[bodyLength - 1],
+        this.chain[this.bodyLength - 1],
         0,
-        this.chain[bodyLength - 1].radius,
+        this.chain[this.bodyLength - 1].radius,
       ),
     );
     ctx.fillStyle = "#222";
