@@ -21,10 +21,10 @@ window.addEventListener("load", () => {
   window.addEventListener("resize", updateUnits);
 });
 
-export const cw = (n: number) => n * canvasW;
-export const ch = (n: number) => n * canvasH;
-export const cmax = (n: number) => n * canvasMax;
-export const cmin = (n: number) => n * canvasMin;
+export const cw = (n: number) => (n * canvasW) / 100;
+export const ch = (n: number) => (n * canvasH) / 100;
+export const cmax = (n: number) => (n * canvasMax) / 100;
+export const cmin = (n: number) => (n * canvasMin) / 100;
 
 // Catmull–Rom spline
 export function drawSpline(

@@ -1,14 +1,12 @@
-import { acceleration, maxSpeed, rotationSpeed } from "./const";
-import { controls } from "./controls";
-import type { State } from "./game";
-import { moveAndSlide } from "./util/collision";
-import { normalizeAngle, relativeAngleDiff } from "./util/util";
-import { Vector2 } from "./util/vector2";
+import { acceleration, maxSpeed, rotationSpeed } from "../const";
+import { controls } from "../controls";
+import type { State } from "../game";
+import { moveAndSlide } from "../util/collision";
+import { cmax } from "../util/draw";
+import { normalizeAngle, relativeAngleDiff } from "../util/util";
+import { Vector2 } from "../util/vector2";
 
 export function updatePlayer(state: State, dt: number) {
-  const multiplier =
-    Math.max(state.ctx.canvas.width, state.ctx.canvas.height) / 100;
-
   const target = new Vector2(
     Math.sign(controls.right - controls.left),
     Math.sign(controls.down - controls.up),
@@ -24,8 +22,8 @@ export function updatePlayer(state: State, dt: number) {
       Math.min(Math.abs(diff), Math.abs(dt * rotationSpeed)) * Math.sign(diff);
 
     const speed = Math.min(
-      maxSpeed * multiplier * dt,
-      state.player.velocity.length + acceleration * multiplier * dt * dt,
+      cmax(maxSpeed) * dt,
+      state.player.velocity.length + cmax(acceleration) * dt * dt,
     );
 
     state.player.velocity
@@ -35,12 +33,10 @@ export function updatePlayer(state: State, dt: number) {
   } else {
     const speed = Math.max(
       0,
-      state.player.velocity.length - acceleration * multiplier * dt * dt,
+      state.player.velocity.length - cmax(acceleration) * dt * dt,
     );
     state.player.velocity.normalize().scale(speed);
   }
-
-  moveAndSlide(state.player.target, state.player.velocity, state.obstacles);
 
   state.player.target.copy(
     moveAndSlide(state.player.target, state.player.velocity, state.obstacles),

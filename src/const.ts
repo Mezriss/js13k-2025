@@ -1,3 +1,5 @@
+import type { FishProps } from "./entities/fish";
+
 export const acceleration = 20;
 export const maxSpeed = 30; // max dimension %
 export const rotationSpeed = Math.PI * 8; // per second
@@ -5,7 +7,7 @@ export const minFrameDuration = 1 / 30;
 
 export const screenShakeDuration = 0.5; // seconds
 
-export const namazu = {
+export const namazu: FishProps = {
   segmentLength: 45,
   segmentRadius: [49, 56, 58, 58, 53, 44, 35, 26, 22, 13, 13, 13],
   scale: 0.2,

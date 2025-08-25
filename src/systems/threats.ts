@@ -1,32 +1,13 @@
 import { SpearAttack, StoneAttack } from "../entities/attack";
 import { Polygon, type AABB } from "../entities/polygon";
 import type { State } from "../game";
+import { testBoulder, testRectangle } from "../testData";
 import { getChainAABB } from "../util/chain";
 import {
   checkAABBOverlap,
   checkCirclePolygonCollision,
 } from "../util/collision";
 import { Vector2 } from "../util/vector2";
-
-const testBoulder = [
-  [-3, -1],
-  [-1, -3],
-  [2, -2],
-  [3, 1],
-  [1, 3],
-  [-1, 3],
-  [-3, 1],
-  [-3, -1],
-].map((p) => new Vector2(...(p as [number, number])));
-
-const testRectangle = [
-  [0, 0],
-  [1, 0],
-  [1, 1],
-  [0, 1],
-].map((p) =>
-  new Vector2(...(p as [number, number])).multiply(new Vector2(1000, 30)),
-);
 
 export function updateThreats(state: State, dt: number) {
   while (state.attacks.length < 3) {

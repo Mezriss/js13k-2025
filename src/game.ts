@@ -2,10 +2,11 @@ import { Fish } from "./entities/fish";
 import { Vector2 } from "./util/vector2";
 import { minFrameDuration, screenShakeDuration, namazu } from "./const";
 import { Polygon } from "./entities/polygon";
-import { updatePlayer } from "./player";
+import { updatePlayer } from "./systems/player";
 import type { Attack } from "./entities/attack";
 import { updateThreats } from "./systems/threats";
-import type { Chain } from "./util/chain";
+import { loadLevel } from "./systems/level";
+import { initNpcs, updateNpcs } from "./systems/npcs";
 
 export type State = {
   player: { body: Fish; target: Vector2; velocity: Vector2; hp: number };
@@ -15,10 +16,9 @@ export type State = {
     screenShake: number;
   };
   npcs: {
-    body: Chain;
+    body: Fish;
     target: Vector2;
-    velocity: Vector2;
-    hp: number;
+    path: Vector2[];
   }[];
   ctx: CanvasRenderingContext2D;
 };
@@ -43,18 +43,8 @@ export const init = (canvas: HTMLCanvasElement) => {
     ctx: canvas.getContext("2d") as CanvasRenderingContext2D,
   };
 
-  state.obstacles.push(
-    new Polygon(
-      new Vector2(100, 100),
-      [
-        new Vector2(0, 0),
-        new Vector2(100, 0),
-        new Vector2(100, 100),
-        new Vector2(0, 100),
-      ],
-      Math.PI / 4,
-    ),
-  );
+  loadLevel(state);
+  initNpcs(state);
 
   prevTime = Number(document.timeline.currentTime);
   loop(prevTime);
@@ -78,6 +68,7 @@ const loop: FrameRequestCallback = (time) => {
 };
 
 const update = (dt: number) => {
+  updateNpcs(state, dt);
   updatePlayer(state, dt);
   updateThreats(state, dt);
   updateAnimations(state, dt);
@@ -102,6 +93,7 @@ const draw = (ctx: CanvasRenderingContext2D) => {
 
   state.obstacles.forEach((obstacle) => obstacle.debugDraw(ctx));
   state.attacks.forEach((attack) => attack.draw(ctx));
+  state.npcs.forEach((npc) => npc.body.draw(ctx));
   state.player.body.draw(ctx);
 
   ctx.restore();

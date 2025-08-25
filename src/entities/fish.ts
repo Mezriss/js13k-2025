@@ -5,7 +5,7 @@ import { Vector2 } from "../util/vector2";
 
 const maxAngle = Math.PI / 8;
 
-type FishProps = {
+export type FishProps = {
   segmentLength: number;
   segmentRadius: number[];
   scale: number;
