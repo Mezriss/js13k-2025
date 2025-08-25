@@ -9,7 +9,13 @@ import { loadLevel } from "./systems/level";
 import { initNpcs, updateNpcs } from "./systems/npcs";
 
 export type State = {
-  player: { body: Fish; target: Vector2; velocity: Vector2; hp: number };
+  player: {
+    body: Fish;
+    target: Vector2;
+    velocity: Vector2;
+    hp: number;
+    energy: number;
+  };
   obstacles: Polygon[];
   attacks: Attack[];
   animations: {
@@ -19,6 +25,7 @@ export type State = {
     body: Fish;
     target: Vector2;
     path: Vector2[];
+    value: number;
   }[];
   ctx: CanvasRenderingContext2D;
 };
@@ -33,6 +40,7 @@ export const init = (canvas: HTMLCanvasElement) => {
       target: new Vector2(0, -30),
       velocity: new Vector2(0, 0),
       hp: 3,
+      energy: 0,
     },
     obstacles: [],
     attacks: [],
@@ -53,10 +61,14 @@ export const init = (canvas: HTMLCanvasElement) => {
 };
 
 const updateAnimations = (state: State, dt: number) => {
-  state.animations.screenShake = Math.max(
-    0,
-    state.animations.screenShake - dt / screenShakeDuration,
-  );
+  (
+    [["screenShake", screenShakeDuration]] as [
+      keyof State["animations"],
+      number,
+    ][]
+  ).forEach(([key, duration]) => {
+    state.animations[key] = Math.max(0, state.animations[key] - dt / duration);
+  });
 };
 
 const loop: FrameRequestCallback = (time) => {

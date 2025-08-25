@@ -9,6 +9,7 @@ import { Vector2 } from "../util/vector2";
 export function initNpcs(state: State): void {
   state.npcs.push({
     body: new Fish(testNPC),
+    value: 1,
     target: new Vector2(-100, -100),
     path: [
       [-300, -300],
@@ -29,11 +30,11 @@ export function updateNpcs(state: State, dt: number): void {
       .clone()
       .subtract(npc.target)
       .normalize()
-      .scale(cmax(maxSpeed) * dt);
+      .scale(cmax(maxSpeed * 0.8) * dt);
     npc.target.copy(moveAndSlide(npc.target, velocity, state.obstacles));
     npc.body.update(npc.target);
 
-    if (npc.target.clone().subtract(npc.path[0]).lengthSquared < 25) {
+    if (npc.target.clone().subtract(npc.path[0]).length < 10) {
       npc.path.push(npc.path.shift()!);
     }
   }

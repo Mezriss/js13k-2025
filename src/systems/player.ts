@@ -7,6 +7,26 @@ import { normalizeAngle, relativeAngleDiff } from "../util/util";
 import { Vector2 } from "../util/vector2";
 
 export function updatePlayer(state: State, dt: number) {
+  handleControls(state, dt);
+  catchFish(state);
+}
+
+function catchFish(state: State) {
+  for (const npc of state.npcs) {
+    for (let i = 0; i < npc.body.bodyLength; i++) {
+      if (
+        npc.body.chain[i].joint.clone().subtract(state.player.target).length <
+        state.player.body.chain[0].radius / 2
+      ) {
+        state.player.energy += npc.value;
+        state.npcs.splice(state.npcs.indexOf(npc), 1);
+        break;
+      }
+    }
+  }
+}
+
+function handleControls(state: State, dt: number) {
   const target = new Vector2(
     Math.sign(controls.right - controls.left),
     Math.sign(controls.down - controls.up),
