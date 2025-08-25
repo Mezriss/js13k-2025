@@ -1,12 +1,12 @@
-import { SpearAttack, StoneAttack } from "./entities/attack";
-import { Polygon, type AABB } from "./entities/polygon";
-import type { State } from "./game";
-import { getChainAABB } from "./util/chain";
+import { SpearAttack, StoneAttack } from "../entities/attack";
+import { Polygon, type AABB } from "../entities/polygon";
+import type { State } from "../game";
+import { getChainAABB } from "../util/chain";
 import {
   checkAABBOverlap,
   checkCirclePolygonCollision,
-} from "./util/collision";
-import { Vector2 } from "./util/vector2";
+} from "../util/collision";
+import { Vector2 } from "../util/vector2";
 
 const testBoulder = [
   [-3, -1],

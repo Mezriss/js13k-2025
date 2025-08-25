@@ -3,34 +3,60 @@ import { drawEllipse, drawSpline } from "../util/draw";
 import { normalizeAngle, relativeAngleDiff } from "../util/util";
 import { Vector2 } from "../util/vector2";
 
-const segmentLength = 45;
-const segmentRadius = [49, 56, 58, 58, 53, 44, 35, 26, 22, 13, 13, 13];
 const maxAngle = Math.PI / 8;
 
-export class Namazu {
-  chain: Chain;
-  scale = 0.2;
-  segmentCount = 12;
-  bodyLength = 10;
+type FishProps = {
+  segmentLength: number;
+  segmentRadius: number[];
+  scale: number;
+  bodyLength: number;
+  palette: FishPalette;
+};
 
-  constructor() {
-    const that = this;
+type FishPalette = {
+  outline: string;
+  fins: string;
+  body: string;
+  eyeSclera: string;
+  eyeIris: string;
+  eyePupil: string;
+};
+
+export class Fish {
+  chain: Chain;
+  scale: number;
+  bodyLength: number;
+  segmentLength: number;
+  segmentCount: number;
+  palette: FishPalette;
+
+  constructor({
+    segmentLength,
+    segmentRadius,
+    scale,
+    bodyLength,
+    palette,
+  }: FishProps) {
+    this.scale = scale;
+    this.segmentLength = segmentLength;
+    this.segmentCount = segmentRadius.length;
+    this.bodyLength = bodyLength;
+    this.palette = palette;
+
     this.chain = Array.from({ length: this.segmentCount }, (_e, i) => ({
       joint: new Vector2(0, segmentLength * i),
       angle: 0,
       get radius(): number {
-        return segmentRadius[i] * that.scale;
+        return segmentRadius[i] * scale;
       },
     }));
   }
 
   update(target: Vector2) {
-    resolveChain(target, this.chain, segmentLength * this.scale, maxAngle);
+    resolveChain(target, this.chain, this.segmentLength * this.scale, maxAngle);
   }
 
   draw(ctx: CanvasRenderingContext2D) {
-    //TODO: striped gradient for fins
-
     const maxBodyCurve = maxAngle * (this.segmentCount - 1);
     let bodyCurve = 0;
     for (let i = 1; i < this.chain.length; i++) {
@@ -40,10 +66,19 @@ export class Namazu {
       );
     }
 
-    ctx.strokeStyle = "#AAA";
-    ctx.fillStyle = "#333";
-    ctx.lineWidth = (this.scale * segmentLength) / 9;
+    ctx.strokeStyle = this.palette.outline;
+    ctx.fillStyle = this.palette.fins;
+    ctx.lineWidth = (this.scale * this.segmentLength) / 9;
 
+    this._drawPectoralFins(ctx);
+    this._drawVentralFins(ctx);
+    this._drawCaudalFin(ctx, bodyCurve, maxBodyCurve);
+    this._drawBodyOutline(ctx);
+    this._drawDorsalFin(ctx, bodyCurve, maxBodyCurve);
+    this._drawEyes(ctx);
+  }
+
+  private _drawPectoralFins(ctx: CanvasRenderingContext2D) {
     const pectoralFinL = getSurfacePoint(
       this.chain[2],
       Math.PI / 2,
@@ -71,7 +106,9 @@ export class Namazu {
     );
     ctx.stroke();
     ctx.fill();
+  }
 
+  private _drawVentralFins(ctx: CanvasRenderingContext2D) {
     const ventralFinL = getSurfacePoint(
       this.chain[7],
       Math.PI / 2,
@@ -99,8 +136,13 @@ export class Namazu {
     );
     ctx.stroke();
     ctx.fill();
+  }
 
-    // caudal fin
+  private _drawCaudalFin(
+    ctx: CanvasRenderingContext2D,
+    bodyCurve: number,
+    maxBodyCurve: number,
+  ) {
     const caudalFinTop = this.chain.slice(-3);
     const caudalFinBottom = caudalFinTop.toReversed().map((point, i) => {
       const maxW = this.chain[this.chain.length - 1].radius;
@@ -119,7 +161,9 @@ export class Namazu {
     ctx.beginPath();
     drawSpline(ctx, caudalFin);
     ctx.stroke();
+  }
 
+  private _drawBodyOutline(ctx: CanvasRenderingContext2D) {
     const outline = [0.8, 1, 1.2].map((r) =>
       getSurfacePoint(this.chain[0], Math.PI * r, this.chain[0].radius),
     );
@@ -146,12 +190,18 @@ export class Namazu {
         this.chain[this.bodyLength - 1].radius,
       ),
     );
-    ctx.fillStyle = "#222";
+    ctx.fillStyle = this.palette.body;
     ctx.beginPath();
     drawSpline(ctx, outline);
     ctx.fill();
     ctx.stroke();
+  }
 
+  private _drawDorsalFin(
+    ctx: CanvasRenderingContext2D,
+    bodyCurve: number,
+    maxBodyCurve: number,
+  ) {
     const dorsalFin = [
       this.chain[3].joint,
       ...[4, 5].map((i) =>
@@ -163,22 +213,24 @@ export class Namazu {
       ),
       this.chain[6].joint,
     ];
-    ctx.fillStyle = "#333";
+    ctx.fillStyle = this.palette.fins;
     ctx.beginPath();
     drawSpline(ctx, dorsalFin);
     ctx.fill();
     ctx.beginPath();
     drawSpline(ctx, dorsalFin);
     ctx.stroke();
+  }
 
+  private _drawEyes(ctx: CanvasRenderingContext2D) {
     [Math.PI, -Math.PI].map((direction) => {
       const eye = getSurfacePoint(
         this.chain[0],
         direction / 2,
         this.chain[0].radius * 0.6,
       );
-      ctx.fillStyle = "skyblue";
-      ctx.strokeStyle = "#AAA";
+      ctx.fillStyle = this.palette.eyeSclera;
+      ctx.strokeStyle = this.palette.eyeIris;
       ctx.lineWidth = this.chain[0].radius * 0.05;
       ctx.beginPath();
       drawEllipse(
@@ -191,8 +243,8 @@ export class Namazu {
       ctx.fill();
       ctx.stroke();
 
-      ctx.fillStyle = "black";
-      ctx.strokeStyle = "white";
+      ctx.fillStyle = this.palette.eyePupil;
+      ctx.strokeStyle = "white"; // Pupil highlight color
       const eyeInner = getSurfacePoint(
         this.chain[0],
         direction / 2,

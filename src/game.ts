@@ -1,18 +1,25 @@
-import { Namazu } from "./entities/namazu";
+import { Fish } from "./entities/fish";
 import { Vector2 } from "./util/vector2";
-import { minFrameDuration, screenShakeDuration } from "./const";
+import { minFrameDuration, screenShakeDuration, namazu } from "./const";
 import { Polygon } from "./entities/polygon";
 import { updatePlayer } from "./player";
 import type { Attack } from "./entities/attack";
-import { updateThreats } from "./threatManager";
+import { updateThreats } from "./systems/threats";
+import type { Chain } from "./util/chain";
 
 export type State = {
-  player: { body: Namazu; target: Vector2; velocity: Vector2; hp: number };
+  player: { body: Fish; target: Vector2; velocity: Vector2; hp: number };
   obstacles: Polygon[];
   attacks: Attack[];
   animations: {
     screenShake: number;
   };
+  npcs: {
+    body: Chain;
+    target: Vector2;
+    velocity: Vector2;
+    hp: number;
+  }[];
   ctx: CanvasRenderingContext2D;
 };
 
@@ -22,7 +29,7 @@ let prevTime: number;
 export const init = (canvas: HTMLCanvasElement) => {
   state = {
     player: {
-      body: new Namazu(),
+      body: new Fish(namazu),
       target: new Vector2(0, -30),
       velocity: new Vector2(0, 0),
       hp: 3,
@@ -32,6 +39,7 @@ export const init = (canvas: HTMLCanvasElement) => {
     animations: {
       screenShake: 0,
     },
+    npcs: [],
     ctx: canvas.getContext("2d") as CanvasRenderingContext2D,
   };
 

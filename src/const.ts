@@ -4,3 +4,18 @@ export const rotationSpeed = Math.PI * 8; // per second
 export const minFrameDuration = 1 / 30;
 
 export const screenShakeDuration = 0.5; // seconds
+
+export const namazu = {
+  segmentLength: 45,
+  segmentRadius: [49, 56, 58, 58, 53, 44, 35, 26, 22, 13, 13, 13],
+  scale: 0.2,
+  bodyLength: 10,
+  palette: {
+    outline: "#AAA",
+    fins: "#333",
+    body: "#222",
+    eyeSclera: "skyblue",
+    eyeIris: "#AAA",
+    eyePupil: "black",
+  },
+};
