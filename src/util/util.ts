@@ -44,10 +44,16 @@ export class Tweened {
 
   update(target: number, dt: number) {
     if (target !== this.next) {
-      this.prev = this.next;
+      const current =
+        this.progress >= 1
+          ? this.next
+          : this.prev + (this.next - this.prev) * this.ease(this.progress);
+
+      this.prev = current;
       this.next = target;
       this.progress = 0;
     }
+
     if (this.progress >= 1) return;
 
     this.progress += dt / this.duration;
