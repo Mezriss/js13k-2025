@@ -1,5 +1,6 @@
-import { acceleration, maxSpeed, rotationSpeed } from "../const";
+import { acceleration, maxSpeed, rotationSpeed, thrashingCost } from "../const";
 import { controls } from "../controls";
+import { Ripple } from "../entities/vfx";
 import type { State } from "../game";
 import { moveAndSlide } from "../util/collision";
 import { cmax } from "../util/draw";
@@ -29,7 +30,42 @@ function catchFish(state: State) {
   }
 }
 
+const thrashing = {
+  start: new Vector2(),
+  pivot: new Vector2(),
+};
+
+function thrash(state: State) {
+  if (state.animations.thrash) {
+    state.player.position.copy(
+      moveAndSlide(
+        state.player.position,
+        thrashing.start
+          .clone()
+          .rotateAround(thrashing.pivot, Math.PI * 2 * state.animations.thrash)
+          .subtract(state.player.position),
+        state.obstacles,
+      ),
+    );
+    ensureBounds(state);
+    state.player.body.update(state.player.position);
+    return;
+  }
+
+  if (state.player.energy < thrashingCost) return;
+  state.player.energy -= thrashingCost;
+  thrashing.start.copy(state.player.position);
+  thrashing.pivot.copy(state.player.body.chain[0].joint);
+  state.animations.thrash = 1;
+  state.vfx.push(new Ripple(thrashing.pivot));
+}
+
 function handleControls(state: State, dt: number) {
+  if (controls.action || state.animations.thrash) {
+    thrash(state);
+  }
+  if (state.animations.thrash) return;
+
   const target = new Vector2(
     Math.sign(controls.right - controls.left),
     Math.sign(controls.down - controls.up),

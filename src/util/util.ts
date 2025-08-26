@@ -74,6 +74,9 @@ export const easing = {
   linear(t: number) {
     return t;
   },
+  parabolic(t: number) {
+    return 4 * t * (1 - t);
+  },
 
   // easeInQuad(t: number) {
   //   return t * t;

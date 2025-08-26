@@ -8,6 +8,8 @@ import { updateThreats } from "./systems/threats";
 import { loadLevel } from "./systems/level";
 import { initNpcs, updateNpcs } from "./systems/npcs";
 import { UI } from "./entities/ui";
+import { easing } from "./util/util";
+import type { Vfx } from "./entities/vfx";
 
 export type State = {
   player: {
@@ -23,6 +25,7 @@ export type State = {
   animations: {
     hit: number;
     catch: number;
+    thrash: number;
   };
   npcs: {
     body: Fish;
@@ -30,6 +33,7 @@ export type State = {
     path: Vector2[];
     value: number;
   }[];
+  vfx: Vfx[];
   ctx: CanvasRenderingContext2D;
 };
 
@@ -44,7 +48,7 @@ export const init = (canvas: HTMLCanvasElement) => {
       position: new Vector2(0, -30),
       velocity: new Vector2(0, 0),
       hp: 3,
-      energy: 0,
+      energy: 50,
       score: 0,
     },
     obstacles: [],
@@ -52,8 +56,10 @@ export const init = (canvas: HTMLCanvasElement) => {
     animations: {
       hit: 0,
       catch: 0,
+      thrash: 0,
     },
     npcs: [],
+    vfx: [],
     ctx: canvas.getContext("2d") as CanvasRenderingContext2D,
   };
 
@@ -78,6 +84,16 @@ const updateAnimations = (state: State, dt: number) => {
   }
 };
 
+const updateVfx = (state: State, dt: number) => {
+  for (let i = state.vfx.length - 1; i >= 0; i--) {
+    const sfx = state.vfx[i];
+    sfx.update(dt);
+    if (sfx.progress >= 1) {
+      state.vfx.splice(i, 1);
+    }
+  }
+};
+
 const loop: FrameRequestCallback = (time) => {
   const dt = Math.min((time - prevTime) / 1000, minFrameDuration);
   prevTime = time;
@@ -91,6 +107,7 @@ const update = (dt: number) => {
   updatePlayer(state, dt);
   updateThreats(state, dt);
   updateAnimations(state, dt);
+  updateVfx(state, dt);
   ui.update(state, dt);
 };
 
@@ -111,17 +128,18 @@ const draw = (ctx: CanvasRenderingContext2D) => {
     ctx.translate(offsetX, offsetY);
   }
 
+  state.vfx.forEach((sfx) => sfx.draw(ctx)); // TODO sfx layers
   state.obstacles.forEach((obstacle) => obstacle.debugDraw(ctx));
   state.attacks.forEach((attack) => attack.draw(ctx));
   state.npcs.forEach((npc) => npc.body.draw(ctx));
 
-  const easedScaleFactor =
-    4 * state.animations.catch * (1 - state.animations.catch);
-  const catchScale = 1 + easedScaleFactor * 0.1;
+  const easedCatch = easing.parabolic(state.animations.catch);
+  const easedThrash = easing.parabolic(state.animations.thrash);
+  const scale = 1 + Math.max(easedCatch * 0.1, easedThrash * 0.2);
 
   ctx.save();
   ctx.translate(state.player.position.x, state.player.position.y);
-  ctx.scale(catchScale, catchScale);
+  ctx.scale(scale, scale);
   ctx.translate(-state.player.position.x, -state.player.position.y);
 
   state.player.body.draw(ctx);
