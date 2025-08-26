@@ -11,7 +11,7 @@ import { initNpcs, updateNpcs } from "./systems/npcs";
 export type State = {
   player: {
     body: Fish;
-    target: Vector2;
+    position: Vector2;
     velocity: Vector2;
     hp: number;
     energy: number;
@@ -24,7 +24,7 @@ export type State = {
   };
   npcs: {
     body: Fish;
-    target: Vector2;
+    position: Vector2;
     path: Vector2[];
     value: number;
   }[];
@@ -38,7 +38,7 @@ export const init = (canvas: HTMLCanvasElement) => {
   state = {
     player: {
       body: new Fish(namazu),
-      target: new Vector2(0, -30),
+      position: new Vector2(0, -30),
       velocity: new Vector2(0, 0),
       hp: 3,
       energy: 0,
@@ -113,9 +113,9 @@ const draw = (ctx: CanvasRenderingContext2D) => {
   const catchScale = 1 + easedScaleFactor * 0.1;
 
   ctx.save();
-  ctx.translate(state.player.target.x, state.player.target.y);
+  ctx.translate(state.player.position.x, state.player.position.y);
   ctx.scale(catchScale, catchScale);
-  ctx.translate(-state.player.target.x, -state.player.target.y);
+  ctx.translate(-state.player.position.x, -state.player.position.y);
 
   state.player.body.draw(ctx);
 

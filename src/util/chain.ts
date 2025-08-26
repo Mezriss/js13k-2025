@@ -9,13 +9,17 @@ export type Chain = {
 }[];
 
 export const resolveChain = (
-  target: Vector2,
+  position: Vector2,
   chain: Chain,
   segmentLength: number,
   maxAngle: number,
 ) => {
-  chain[0].joint.subtract(target).normalize().scale(segmentLength).add(target);
-  chain[0].angle = chain[0].joint.clone().subtract(target).angle;
+  chain[0].joint
+    .subtract(position)
+    .normalize()
+    .scale(segmentLength)
+    .add(position);
+  chain[0].angle = chain[0].joint.clone().subtract(position).angle;
 
   for (let i = 1; i < chain.length; i += 1) {
     const prevJoint = chain[i - 1].joint;

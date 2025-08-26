@@ -52,8 +52,13 @@ export class Fish {
     }));
   }
 
-  update(target: Vector2) {
-    resolveChain(target, this.chain, this.segmentLength * this.scale, maxAngle);
+  update(position: Vector2) {
+    resolveChain(
+      position,
+      this.chain,
+      this.segmentLength * this.scale,
+      maxAngle,
+    );
   }
 
   draw(ctx: CanvasRenderingContext2D) {

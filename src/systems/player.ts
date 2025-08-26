@@ -15,7 +15,7 @@ function catchFish(state: State) {
   for (const npc of state.npcs) {
     for (let i = 0; i < npc.body.bodyLength; i++) {
       if (
-        npc.body.chain[i].joint.clone().subtract(state.player.target).length <
+        npc.body.chain[i].joint.clone().subtract(state.player.position).length <
         state.player.body.chain[0].radius / 2
       ) {
         state.player.energy += npc.value;
@@ -59,20 +59,20 @@ function handleControls(state: State, dt: number) {
     state.player.velocity.normalize().scale(speed);
   }
 
-  state.player.target.copy(
-    moveAndSlide(state.player.target, state.player.velocity, state.obstacles),
+  state.player.position.copy(
+    moveAndSlide(state.player.position, state.player.velocity, state.obstacles),
   );
   ensureBounds(state);
 
-  state.player.body.update(state.player.target);
+  state.player.body.update(state.player.position);
 }
 
 const ensureBounds = (state: State) => {
   const cx = state.ctx.canvas.width / 2;
   const cy = state.ctx.canvas.height / 2;
 
-  if (state.player.target.x < -cx) state.player.target.x = -cx;
-  if (state.player.target.y < -cy) state.player.target.y = -cy;
-  if (state.player.target.x > cx) state.player.target.x = cx;
-  if (state.player.target.y > cy) state.player.target.y = cy;
+  if (state.player.position.x < -cx) state.player.position.x = -cx;
+  if (state.player.position.y < -cy) state.player.position.y = -cy;
+  if (state.player.position.x > cx) state.player.position.x = cx;
+  if (state.player.position.y > cy) state.player.position.y = cy;
 };

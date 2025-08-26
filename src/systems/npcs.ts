@@ -10,7 +10,7 @@ export function initNpcs(state: State): void {
   state.npcs.push({
     body: new Fish(testNPC),
     value: 1,
-    target: new Vector2(-100, -100),
+    position: new Vector2(-100, -100),
     path: [
       [-300, -300],
       [-300, 300],
@@ -19,7 +19,7 @@ export function initNpcs(state: State): void {
     ].map(([x, y]) => new Vector2(x, y)),
   });
   for (const npc of state.npcs) {
-    npc.body.update(npc.target);
+    npc.body.update(npc.position);
   }
 }
 
@@ -28,13 +28,13 @@ export function updateNpcs(state: State, dt: number): void {
     if (!npc.path.length) continue;
     const velocity = npc.path[0]
       .clone()
-      .subtract(npc.target)
+      .subtract(npc.position)
       .normalize()
       .scale(cmax(maxSpeed * 0.8) * dt);
-    npc.target.copy(moveAndSlide(npc.target, velocity, state.obstacles));
-    npc.body.update(npc.target);
+    npc.position.copy(moveAndSlide(npc.position, velocity, state.obstacles));
+    npc.body.update(npc.position);
 
-    if (npc.target.clone().subtract(npc.path[0]).length < 10) {
+    if (npc.position.clone().subtract(npc.path[0]).length < 10) {
       npc.path.push(npc.path.shift()!);
     }
   }
