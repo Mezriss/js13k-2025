@@ -19,6 +19,8 @@ function catchFish(state: State) {
         state.player.body.chain[0].radius / 2
       ) {
         state.player.energy += npc.value;
+        //TODO: remove when proper scoring system is implemented
+        state.player.score += 1000;
         state.animations.catch = 1;
         state.npcs.splice(state.npcs.indexOf(npc), 1);
         break;

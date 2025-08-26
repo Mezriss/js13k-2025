@@ -26,3 +26,58 @@ export const relativeAngleDiff = (angle: number, targetAngle: number) => {
   const diff = normalizeAngle(angle + Math.PI - targetAngle);
   return Math.PI - diff;
 };
+
+export class Tweened {
+  value: number;
+  prev: number;
+  next: number;
+  progress = 1;
+  duration: number;
+  ease: (t: number) => number;
+  constructor(value: number, duration = 0.5, ease = easing.easeOutCubic) {
+    this.value = value;
+    this.prev = value;
+    this.next = value;
+    this.ease = ease;
+    this.duration = duration;
+  }
+
+  update(target: number, dt: number) {
+    if (target !== this.next) {
+      this.prev = this.next;
+      this.next = target;
+      this.progress = 0;
+    }
+    if (this.progress >= 1) return;
+
+    this.progress += dt / this.duration;
+    if (this.progress >= 1) {
+      this.progress = 1;
+      this.value = this.next;
+    } else {
+      this.value =
+        this.prev + (this.next - this.prev) * this.ease(this.progress);
+    }
+  }
+}
+
+export const easing = {
+  easeOutCubic(x: number): number {
+    return 1 - Math.pow(1 - x, 3);
+  },
+  linear(t: number) {
+    return t;
+  },
+
+  // easeInQuad(t: number) {
+  //   return t * t;
+  // },
+
+  // easeOutQuad(t: number) {
+  //   return t * (2 - t);
+  // },
+
+  // easeInOutQuad(t: number) {
+  //   return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+  // },
+};

@@ -7,6 +7,7 @@ import type { Attack } from "./entities/attack";
 import { updateThreats } from "./systems/threats";
 import { loadLevel } from "./systems/level";
 import { initNpcs, updateNpcs } from "./systems/npcs";
+import { UI } from "./entities/ui";
 
 export type State = {
   player: {
@@ -15,6 +16,7 @@ export type State = {
     velocity: Vector2;
     hp: number;
     energy: number;
+    score: number;
   };
   obstacles: Polygon[];
   attacks: Attack[];
@@ -32,6 +34,7 @@ export type State = {
 };
 
 let state: State;
+let ui: UI;
 let prevTime: number;
 
 export const init = (canvas: HTMLCanvasElement) => {
@@ -42,6 +45,7 @@ export const init = (canvas: HTMLCanvasElement) => {
       velocity: new Vector2(0, 0),
       hp: 3,
       energy: 0,
+      score: 0,
     },
     obstacles: [],
     attacks: [],
@@ -52,6 +56,8 @@ export const init = (canvas: HTMLCanvasElement) => {
     npcs: [],
     ctx: canvas.getContext("2d") as CanvasRenderingContext2D,
   };
+
+  ui = new UI(state);
 
   loadLevel(state);
   initNpcs(state);
@@ -85,6 +91,7 @@ const update = (dt: number) => {
   updatePlayer(state, dt);
   updateThreats(state, dt);
   updateAnimations(state, dt);
+  ui.update(state, dt);
 };
 
 const draw = (ctx: CanvasRenderingContext2D) => {
@@ -120,6 +127,8 @@ const draw = (ctx: CanvasRenderingContext2D) => {
   state.player.body.draw(ctx);
 
   ctx.restore();
+
+  ui.draw(ctx);
 
   ctx.restore();
 };

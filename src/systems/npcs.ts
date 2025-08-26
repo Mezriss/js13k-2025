@@ -9,7 +9,7 @@ import { Vector2 } from "../util/vector2";
 export function initNpcs(state: State): void {
   state.npcs.push({
     body: new Fish(testNPC),
-    value: 1,
+    value: 20,
     position: new Vector2(-100, -100),
     path: [
       [-300, -300],
