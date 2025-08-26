@@ -1,6 +1,6 @@
 import { Fish } from "./entities/fish";
 import { Vector2 } from "./util/vector2";
-import { minFrameDuration, screenShakeDuration, namazu } from "./const";
+import { minFrameDuration, animationDuration, namazu } from "./const";
 import { Polygon } from "./entities/polygon";
 import { updatePlayer } from "./systems/player";
 import type { Attack } from "./entities/attack";
@@ -19,7 +19,8 @@ export type State = {
   obstacles: Polygon[];
   attacks: Attack[];
   animations: {
-    screenShake: number;
+    hit: number;
+    catch: number;
   };
   npcs: {
     body: Fish;
@@ -45,7 +46,8 @@ export const init = (canvas: HTMLCanvasElement) => {
     obstacles: [],
     attacks: [],
     animations: {
-      screenShake: 0,
+      hit: 0,
+      catch: 0,
     },
     npcs: [],
     ctx: canvas.getContext("2d") as CanvasRenderingContext2D,
@@ -61,14 +63,13 @@ export const init = (canvas: HTMLCanvasElement) => {
 };
 
 const updateAnimations = (state: State, dt: number) => {
-  (
-    [["screenShake", screenShakeDuration]] as [
-      keyof State["animations"],
-      number,
-    ][]
-  ).forEach(([key, duration]) => {
-    state.animations[key] = Math.max(0, state.animations[key] - dt / duration);
-  });
+  for (const key in state.animations) {
+    state.animations[key as keyof State["animations"]] = Math.max(
+      0,
+      state.animations[key as keyof State["animations"]] -
+        dt / animationDuration[key as keyof typeof animationDuration],
+    );
+  }
 };
 
 const loop: FrameRequestCallback = (time) => {
@@ -96,8 +97,8 @@ const draw = (ctx: CanvasRenderingContext2D) => {
 
   ctx.save();
 
-  if (state.animations.screenShake > 0) {
-    const shakeMagnitude = state.animations.screenShake * 10;
+  if (state.animations.hit > 0) {
+    const shakeMagnitude = state.animations.hit * 10;
     const offsetX = (Math.random() * 2 - 1) * shakeMagnitude;
     const offsetY = (Math.random() * 2 - 1) * shakeMagnitude;
     ctx.translate(offsetX, offsetY);
@@ -106,7 +107,19 @@ const draw = (ctx: CanvasRenderingContext2D) => {
   state.obstacles.forEach((obstacle) => obstacle.debugDraw(ctx));
   state.attacks.forEach((attack) => attack.draw(ctx));
   state.npcs.forEach((npc) => npc.body.draw(ctx));
+
+  const easedScaleFactor =
+    4 * state.animations.catch * (1 - state.animations.catch);
+  const catchScale = 1 + easedScaleFactor * 0.1;
+
+  ctx.save();
+  ctx.translate(state.player.target.x, state.player.target.y);
+  ctx.scale(catchScale, catchScale);
+  ctx.translate(-state.player.target.x, -state.player.target.y);
+
   state.player.body.draw(ctx);
+
+  ctx.restore();
 
   ctx.restore();
 };

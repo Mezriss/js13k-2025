@@ -53,8 +53,7 @@ export function updateThreats(state: State, dt: number) {
           );
           if (collided) {
             state.player.hp -= 1;
-            state.animations.screenShake = 1;
-            console.info("hit");
+            state.animations.hit = 1;
             break;
           }
         }
