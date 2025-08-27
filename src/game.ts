@@ -10,6 +10,8 @@ import { initNpcs, updateNpcs } from "./systems/npcs";
 import { UI } from "./entities/ui";
 import { easing } from "./util/util";
 import type { Vfx } from "./entities/vfx";
+import { updateUnits } from "./util/draw";
+import type { AttackScheduler } from "./systems/scheduler";
 
 export type State = {
   player: {
@@ -40,6 +42,7 @@ export type State = {
 let state: State;
 let ui: UI;
 let prevTime: number;
+let attackScheduler: AttackScheduler;
 
 export const init = (canvas: HTMLCanvasElement) => {
   state = {
@@ -63,9 +66,13 @@ export const init = (canvas: HTMLCanvasElement) => {
     ctx: canvas.getContext("2d") as CanvasRenderingContext2D,
   };
 
+  updateUnits();
+
+  updateAnimations(state, 0);
+
   ui = new UI(state);
 
-  loadLevel(state);
+  ({ attackScheduler } = loadLevel(state, 0));
   initNpcs(state);
 
   prevTime = Number(document.timeline.currentTime);
@@ -103,6 +110,7 @@ const loop: FrameRequestCallback = (time) => {
 };
 
 const update = (dt: number) => {
+  attackScheduler.update(state, dt);
   updateNpcs(state, dt);
   updatePlayer(state, dt);
   updateThreats(state, dt);
@@ -129,7 +137,15 @@ const draw = (ctx: CanvasRenderingContext2D) => {
   }
 
   state.vfx.forEach((sfx) => sfx.draw(ctx)); // TODO sfx layers
-  state.obstacles.forEach((obstacle) => obstacle.debugDraw(ctx));
+  state.obstacles.forEach((obstacle) => {
+    ctx.fillStyle = "#666";
+    ctx.strokeStyle = "#888";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    obstacle.drawShape(ctx);
+    ctx.fill();
+    ctx.stroke();
+  });
   state.attacks.forEach((attack) => attack.draw(ctx));
   state.npcs.forEach((npc) => npc.body.draw(ctx));
 

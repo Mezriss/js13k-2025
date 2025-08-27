@@ -46,6 +46,37 @@ function getMovementAABB(start: Vector2, end: Vector2): AABB {
   };
 }
 
+/**
+ * Calculates the outward-facing normal for an edge, regardless of polygon winding
+ */
+function calculateOutwardNormal(
+  edge: Vector2,
+  polygon: Polygon,
+  edgeIndex: number,
+): Vector2 {
+  // Calculate both possible normals
+  const normal1 = new Vector2(edge.y, -edge.x).normalize();
+  const normal2 = new Vector2(-edge.y, edge.x).normalize();
+
+  // Get the midpoint of the current edge
+  const p1 = polygon.vertices[edgeIndex];
+  const p2 = polygon.vertices[(edgeIndex + 1) % polygon.vertices.length];
+  const edgeMidpoint = p1.clone().add(p2).scale(0.5);
+
+  // Test which normal points outward by checking if it points away from the polygon center
+  const polygonCenter = polygon.vertices
+    .reduce((sum, v) => sum.add(v), new Vector2(0, 0))
+    .scale(1 / polygon.vertices.length);
+
+  const toCenterVec = polygonCenter.clone().subtract(edgeMidpoint);
+
+  // The outward normal should have a negative dot product with the vector to center
+  if (normal1.dot(toCenterVec) < normal2.dot(toCenterVec)) {
+    return normal1;
+  }
+  return normal2;
+}
+
 function findClosestCollision(
   startPos: Vector2,
   endPos: Vector2,
@@ -69,11 +100,12 @@ function findClosestCollision(
       if (intersection) {
         if (!closestIntersection || intersection.t < closestIntersection.t) {
           const edgeVector = p2.clone().subtract(p1);
-          // The normal is perpendicular to the edge vector
-          // For a clockwise polygon, this gives an outward-facing normal
+
+          const outwardNormal = calculateOutwardNormal(edgeVector, polygon, i);
+
           closestIntersection = {
             intersectionPoint: intersection.point,
-            surfaceNormal: new Vector2(edgeVector.y, -edgeVector.x).normalize(),
+            surfaceNormal: outwardNormal,
             t: intersection.t,
           };
         }
@@ -85,7 +117,7 @@ function findClosestCollision(
 }
 
 function calculateSlideVector(velocity: Vector2, normal: Vector2): Vector2 {
-  const dotProduct = velocity.clone().dot(normal);
+  const dotProduct = velocity.dot(normal);
   const projection = normal.clone().scale(dotProduct);
   return velocity.clone().subtract(projection);
 }
@@ -96,13 +128,13 @@ export function moveAndSlide(
   polygons: Polygon[],
   maxBounces: number = 3,
 ): Vector2 {
-  let currentPosition = startPos;
-  let currentVelocity = velocity;
+  let currentPosition = startPos.clone();
+  let currentVelocity = velocity.clone();
   let remainingTime = 1.0;
   const Epsilon = 0.0001; // To avoid floating point issues and getting stuck
 
   for (let i = 0; i < maxBounces; i++) {
-    if (remainingTime <= 0) break;
+    if (remainingTime <= Epsilon) break;
 
     const intendedDestination = currentPosition
       .clone()
@@ -125,7 +157,6 @@ export function moveAndSlide(
     currentPosition.add(movementToCollision);
 
     // Push the character slightly away from the wall along the normal
-    // to prevent it from being detected as "inside" on the next frame.
     currentPosition.add(collision.surfaceNormal.clone().scale(Epsilon));
 
     remainingTime *= 1.0 - collision.t;
@@ -134,6 +165,10 @@ export function moveAndSlide(
       currentVelocity,
       collision.surfaceNormal,
     );
+
+    if (currentVelocity.lengthSquared < Epsilon * Epsilon) {
+      break;
+    }
   }
 
   return currentPosition;
@@ -149,7 +184,7 @@ function getClosestPointOnSegment(
 
   const edgeLengthSq = edgeVector.lengthSquared;
   if (edgeLengthSq === 0) {
-    return p1;
+    return p1.clone();
   }
 
   // Project pointVector onto edgeVector to find the 't' parameter
@@ -162,27 +197,32 @@ function getClosestPointOnSegment(
   return p1.clone().add(edgeVector.scale(t));
 }
 
-/**
- * Checks if a point is inside a convex polygon (vertices ordered clockwise).
- * Uses the "left-of-edge" test. For a CW polygon, the point must be to the right of all edges.
- */
 function isPointInPolygon(point: Vector2, polygon: Polygon): boolean {
   const vertices = polygon.vertices;
+  let windingNumber = 0;
+
   for (let i = 0; i < vertices.length; i++) {
     const p1 = vertices[i];
     const p2 = vertices[(i + 1) % vertices.length];
 
-    const edge = p2.clone().subtract(p1);
-    const pointVec = point.clone().subtract(p1);
-
-    // Using 2D cross-product. For a CW polygon, a point inside
-    // will result in a positive or zero cross product for all edges.
-    const crossProduct = edge.x * pointVec.y - edge.y * pointVec.x;
-    if (crossProduct < 0) {
-      return false; // Point is to the "left" of an edge, so it's outside
+    if (p1.y <= point.y) {
+      if (p2.y > point.y) {
+        // Upward crossing
+        const cross =
+          (p2.x - p1.x) * (point.y - p1.y) - (point.x - p1.x) * (p2.y - p1.y);
+        if (cross > 0) windingNumber++;
+      }
+    } else {
+      if (p2.y <= point.y) {
+        // Downward crossing
+        const cross =
+          (p2.x - p1.x) * (point.y - p1.y) - (point.x - p1.x) * (p2.y - p1.y);
+        if (cross < 0) windingNumber--;
+      }
     }
   }
-  return true;
+
+  return windingNumber !== 0;
 }
 
 export function checkCirclePolygonCollision(
@@ -199,7 +239,6 @@ export function checkCirclePolygonCollision(
     const p2 = vertices[(i + 1) % vertices.length];
 
     const closestPointOnSegment = getClosestPointOnSegment(center, p1, p2);
-
     const distanceSq = center
       .clone()
       .subtract(closestPointOnSegment).lengthSquared;
@@ -218,11 +257,10 @@ export function checkCirclePolygonCollision(
 }
 
 export function checkAABBOverlap(a: AABB, b: AABB): boolean {
-  if (a.min.x > b.max.x || b.min.x > a.max.x) {
-    return false;
-  }
-  if (a.min.y > b.max.y || b.min.y > a.max.y) {
-    return false;
-  }
-  return true;
+  return !(
+    a.min.x > b.max.x ||
+    b.min.x > a.max.x ||
+    a.min.y > b.max.y ||
+    b.min.y > a.max.y
+  );
 }

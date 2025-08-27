@@ -5,7 +5,7 @@ let canvasH = 1;
 let canvasMax = 1;
 let canvasMin = 1;
 
-const updateUnits = () => {
+export const updateUnits = () => {
   const canvas = (document.getElementById("c") as HTMLCanvasElement) || {
     width: 0,
     height: 0,
@@ -17,7 +17,6 @@ const updateUnits = () => {
 };
 
 window.addEventListener("load", () => {
-  updateUnits();
   window.addEventListener("resize", updateUnits);
 });
 

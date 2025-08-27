@@ -9,4 +9,6 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 
 const canvas = document.getElementById("c") as HTMLCanvasElement;
 
-init(canvas);
+window.addEventListener("load", () => {
+  init(canvas);
+});

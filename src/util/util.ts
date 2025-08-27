@@ -90,3 +90,28 @@ export const easing = {
   //   return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
   // },
 };
+
+export class Splitmix32 {
+  seed: number;
+  constructor(seed: number) {
+    this.seed = seed;
+  }
+
+  rnd() {
+    this.seed |= 0;
+    this.seed = (this.seed + 0x9e3779b9) | 0;
+    let t = this.seed ^ (this.seed >>> 16);
+    t = Math.imul(t, 0x21f0aaad);
+    t = t ^ (t >>> 15);
+    t = Math.imul(t, 0x735a2d97);
+    return ((t = t ^ (t >>> 15)) >>> 0) / 4294967296;
+  }
+
+  float(min: number = 0, max: number = 1) {
+    return this.rnd() * (max - min) + min;
+  }
+
+  int(min: number, max: number) {
+    return Math.floor(this.rnd() * (max - min + 1)) + min;
+  }
+}
