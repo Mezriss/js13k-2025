@@ -19,8 +19,8 @@
     "prettier": "^3.6.2",
     "roadroller": "^2.1.0",
     "rollup": "^4.46.2",
+    "terser": "^5.43.1",
     "typescript": "~5.8.3",
-    "uglify-js": "^3.19.3",
     "vite": "^7.1.0"
   }
 }

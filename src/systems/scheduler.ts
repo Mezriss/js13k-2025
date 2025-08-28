@@ -59,7 +59,7 @@ export class AttackScheduler {
             position:
               Array.isArray(attack.position) &&
               typeof attack.position[0] !== "number"
-                ? attack.position[i]
+                ? (attack.position[i] as Position)
                 : attack.position,
           });
         }

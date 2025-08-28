@@ -1,3 +1,5 @@
+// based on https://github.com/roblouie/js13k-typescript-starter/blob/master/vite.config.ts
+
 import {
   defineConfig,
   IndexHtmlTransformContext,
@@ -11,6 +13,7 @@ import { Input, InputAction, InputType, Packer } from "roadroller";
 import CleanCSS from "clean-css";
 import { statSync } from "fs";
 import { execFileSync } from "node:child_process";
+import { defaultTerserOptions } from "./terser.config";
 import ect from "ect-bin";
 
 import { minify as minifyHtml } from "html-minifier";
@@ -28,8 +31,8 @@ export default defineConfig(({ command, mode }) => {
       },
       esbuild: {},
       build: {
-        minify: false,
-        target: "es2020",
+        minify: "terser",
+        target: "es2023",
         modulePreload: { polyfill: false },
         assetsInlineLimit: 800,
         assetsDir: "",
@@ -40,11 +43,12 @@ export default defineConfig(({ command, mode }) => {
             assetFileNames: `[name].[ext]`,
           },
         },
+        terserOptions: defaultTerserOptions,
       },
       define: {
         BASE_URL: "./",
       },
-      plugins: [uglifyPlugin(), roadrollerPlugin(), ectPlugin()],
+      plugins: [roadrollerPlugin(), ectPlugin()],
     };
   } else {
     config = {
@@ -59,18 +63,6 @@ export default defineConfig(({ command, mode }) => {
 
   return config;
 });
-
-function uglifyPlugin(): Plugin {
-  return {
-    name: "uglify-js",
-    // @ts-ignore
-    renderChunk(js: string, chunk: any) {
-      const minified = minifyJs(js, { mangle: true });
-      return { code: minified.code };
-    },
-    enforce: "post",
-  };
-}
 
 function roadrollerPlugin(): Plugin {
   return {
