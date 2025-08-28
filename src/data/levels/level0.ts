@@ -26,7 +26,22 @@ export default {
       rotation: -0.25,
     },
   ],
-  fish: [],
+  npcs: [
+    {
+      t: 2,
+      variant: "test",
+      position: [-40, -40],
+      path: [
+        [-30, -30],
+        [-30, 30],
+        [25, 25],
+        [30, -30],
+      ],
+      cycle: true,
+      amount: 3,
+      scatter: 5,
+    },
+  ],
   attacks: [
     {
       t: 2,

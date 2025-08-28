@@ -1,18 +1,43 @@
 import type { State } from "@/game";
-import type { AttackConfig, Position } from "./level";
 import { Splitmix32 } from "@/util/util";
 import { ch, cmin, cw } from "@/util/draw";
 import { Vector2 } from "@/util/vector2";
 import { SpearAttack, StoneAttack } from "@/entities/attack";
 import { testBoulder, testRectangle } from "@/testData";
 import { Polygon } from "@/entities/polygon";
+import { initNPC } from "./npcs";
 
-export class AttackScheduler {
+type Position = "random" | "player" | [number, number];
+type Rotation = number | "random";
+
+export type AttackConfig = {
+  t: number;
+  stagger?: number;
+  type: "spear" | "rock";
+  position: Position | Position[];
+  amount?: number;
+  rotation?: Rotation | Rotation[];
+  scatter?: number;
+};
+
+export type NPCConfig = {
+  t: number;
+  amount?: number;
+  stagger?: number;
+  position: [number, number];
+  path: [number, number][];
+  scatter?: number;
+  cycle?: boolean;
+  variant: string;
+};
+
+abstract class BaseScheduler<T> {
   t = 0;
   rand: Splitmix32;
-  schedule: (AttackConfig | AttackConfig[])[] = [];
-  current: AttackConfig[] | undefined;
-  constructor(schedule: (AttackConfig | AttackConfig[])[], seed = 1) {
+  schedule: (T | T[])[] = [];
+  current: T[] | undefined;
+
+  constructor(schedule: (T | T[])[], seed = 1) {
     this.schedule = schedule.slice();
     this.rand = new Splitmix32(seed);
     this.setCurrent();
@@ -22,9 +47,9 @@ export class AttackScheduler {
     if (!this.current) return;
     this.t += dt;
     for (let i = this.current.length - 1; i >= 0; i--) {
-      const attack = this.current[i];
-      if (attack.t <= this.t) {
-        this.applyAttack(state, attack);
+      const config = this.current[i];
+      if (this.getTime(config) <= this.t) {
+        this.applyConfig(state, config);
         this.current.splice(i, 1);
       }
     }
@@ -33,6 +58,7 @@ export class AttackScheduler {
       this.setCurrent();
     }
   }
+
   setCurrent() {
     const next = this.schedule.shift();
     if (!next) {
@@ -40,37 +66,50 @@ export class AttackScheduler {
       return;
     }
 
-    const attacks = Array.isArray(next) ? next : [next];
+    const configs = Array.isArray(next) ? next : [next];
     this.current = [];
 
-    // Process each attack, expanding staggered attacks
-    for (const attack of attacks) {
-      const amount = attack.amount ?? 1;
+    // Process each config, expanding staggered configs
+    for (const config of configs) {
+      const amount = this.getAmount(config);
+      const stagger = this.getStagger(config);
 
-      if (attack.stagger && amount > 1) {
+      if (stagger > 0 && amount > 1) {
+        // Create individual configs with stagger timing
         for (let i = 0; i < amount; i++) {
           this.current.push({
-            ...attack,
+            ...config,
             amount: 1,
-            t: attack.t + i * attack.stagger,
-            rotation: Array.isArray(attack.rotation)
-              ? attack.rotation[i]
-              : attack.rotation,
-            position:
-              Array.isArray(attack.position) &&
-              typeof attack.position[0] !== "number"
-                ? (attack.position[i] as Position)
-                : attack.position,
-          });
+            t: this.getTime(config) + i * stagger,
+          } as T);
         }
       } else {
-        // Single attack or no stagger
-        this.current.push(attack);
+        // Single config or no stagger
+        this.current.push(config);
       }
     }
   }
 
-  applyAttack(state: State, attack: AttackConfig) {
+  abstract getTime(config: T): number;
+  abstract getAmount(config: T): number;
+  abstract getStagger(config: T): number;
+  abstract applyConfig(state: State, config: T): void;
+}
+
+export class AttackScheduler extends BaseScheduler<AttackConfig> {
+  getTime(config: AttackConfig): number {
+    return config.t;
+  }
+
+  getAmount(config: AttackConfig): number {
+    return config.amount ?? 1;
+  }
+
+  getStagger(config: AttackConfig): number {
+    return config.stagger ?? 0;
+  }
+
+  applyConfig(state: State, attack: AttackConfig) {
     const amount = attack.amount ?? 1;
 
     // Calculate rotation for each projectile
@@ -140,6 +179,54 @@ export class AttackScheduler {
           ),
         );
       }
+    }
+  }
+}
+
+export class NPCScheduler extends BaseScheduler<NPCConfig> {
+  getTime(config: NPCConfig): number {
+    return config.t;
+  }
+
+  getAmount(config: NPCConfig): number {
+    return config.amount ?? 1;
+  }
+
+  getStagger(config: NPCConfig): number {
+    return config.stagger ?? 0;
+  }
+
+  applyConfig(state: State, npcConfig: NPCConfig) {
+    const amount = npcConfig.amount ?? 1;
+
+    const positions = new Vector2(
+      cw(npcConfig.position[0]),
+      ch(npcConfig.position[1]),
+    );
+
+    for (let i = 0; i < amount; i++) {
+      const scatterOffset = npcConfig.scatter
+        ? new Vector2(
+            this.rand.float(cw(-npcConfig.scatter), cw(npcConfig.scatter)),
+            this.rand.float(ch(-npcConfig.scatter), ch(npcConfig.scatter)),
+          )
+        : new Vector2(0, 0);
+
+      const pos = positions.clone().add(scatterOffset);
+
+      const scatteredPath = npcConfig.path.map(([x, y]) =>
+        new Vector2(cw(x), ch(y)).add(scatterOffset),
+      );
+
+      const npc = initNPC(
+        npcConfig.variant,
+        pos,
+        scatteredPath,
+        npcConfig.cycle ?? false,
+      );
+      npc.body.update(npc.position);
+      state.npcs.push(npc);
+      console.info(npc, npc.position);
     }
   }
 }

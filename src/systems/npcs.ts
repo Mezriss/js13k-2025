@@ -1,26 +1,35 @@
 import { maxSpeed } from "../const";
-import { Fish } from "../entities/fish";
+import { Fish, type FishProps } from "../entities/fish";
 import type { State } from "../game";
 import { testNPC } from "../testData";
 import { moveAndSlide } from "../util/collision";
 import { cmax } from "../util/draw";
 import { Vector2 } from "../util/vector2";
 
-export function initNpcs(state: State): void {
-  state.npcs.push({
-    body: new Fish(testNPC),
-    value: 20,
-    position: new Vector2(-100, -100),
-    path: [
-      [-300, -300],
-      [-300, 300],
-      [250, 250],
-      [300, -300],
-    ].map(([x, y]) => new Vector2(x, y)),
-  });
-  for (const npc of state.npcs) {
-    npc.body.update(npc.position);
-  }
+export type NPC = {
+  body: FishProps;
+  value: number;
+  speed: number;
+};
+
+const npcs: { [key: string]: NPC } = {
+  test: testNPC,
+};
+
+export function initNPC(
+  variant: string,
+  position: Vector2,
+  path: Vector2[],
+  cycle: boolean,
+): State["npcs"][number] {
+  return {
+    body: new Fish(npcs[variant].body),
+    value: npcs[variant].value,
+    speed: npcs[variant].speed,
+    position,
+    path,
+    cycle,
+  };
 }
 
 export function updateNpcs(state: State, dt: number): void {
@@ -30,7 +39,7 @@ export function updateNpcs(state: State, dt: number): void {
       .clone()
       .subtract(npc.position)
       .normalize()
-      .scale(cmax(maxSpeed * 0.8) * dt);
+      .scale(cmax(maxSpeed * npc.speed) * dt);
     npc.position.copy(moveAndSlide(npc.position, velocity, state.obstacles));
     npc.body.update(npc.position);
 

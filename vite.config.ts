@@ -17,7 +17,6 @@ import { defaultTerserOptions } from "./terser.config";
 import ect from "ect-bin";
 
 import { minify as minifyHtml } from "html-minifier";
-import { minify as minifyJs } from "uglify-js";
 
 export default defineConfig(({ command, mode }) => {
   let config: UserConfig;

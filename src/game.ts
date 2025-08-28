@@ -6,12 +6,12 @@ import { updatePlayer } from "./systems/player";
 import type { Attack } from "./entities/attack";
 import { updateThreats } from "./systems/threats";
 import { loadLevel } from "./systems/level";
-import { initNpcs, updateNpcs } from "./systems/npcs";
+import { updateNpcs } from "./systems/npcs";
 import { UI } from "./entities/ui";
 import { easing } from "./util/util";
 import type { Vfx } from "./entities/vfx";
 import { updateUnits } from "./util/draw";
-import type { AttackScheduler } from "./systems/scheduler";
+import type { AttackScheduler, NPCScheduler } from "./systems/scheduler";
 
 export type State = {
   player: {
@@ -33,7 +33,9 @@ export type State = {
     body: Fish;
     position: Vector2;
     path: Vector2[];
+    cycle: boolean;
     value: number;
+    speed: number;
   }[];
   vfx: Vfx[];
   ctx: CanvasRenderingContext2D;
@@ -43,6 +45,7 @@ let state: State;
 let ui: UI;
 let prevTime: number;
 let attackScheduler: AttackScheduler;
+let npcScheduler: NPCScheduler;
 
 export const init = (canvas: HTMLCanvasElement) => {
   state = {
@@ -72,8 +75,7 @@ export const init = (canvas: HTMLCanvasElement) => {
 
   ui = new UI(state);
 
-  ({ attackScheduler } = loadLevel(state, 0));
-  initNpcs(state);
+  ({ attackScheduler, npcScheduler } = loadLevel(state, 0));
 
   prevTime = Number(document.timeline.currentTime);
   loop(prevTime);
@@ -111,6 +113,7 @@ const loop: FrameRequestCallback = (time) => {
 
 const update = (dt: number) => {
   attackScheduler.update(state, dt);
+  npcScheduler.update(state, dt);
   updateNpcs(state, dt);
   updatePlayer(state, dt);
   updateThreats(state, dt);

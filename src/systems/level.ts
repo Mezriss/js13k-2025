@@ -3,22 +3,14 @@ import level0 from "../data/levels/level0";
 import { Polygon } from "../entities/polygon";
 import type { State } from "../game";
 import { Vector2 } from "../util/vector2";
-import { AttackScheduler } from "./scheduler";
+import {
+  AttackScheduler,
+  NPCScheduler,
+  type AttackConfig,
+  type NPCConfig,
+} from "./scheduler";
 
 const levels: Level[] = [level0];
-
-export type Position = "random" | "player" | [number, number];
-type Rotation = number | "random";
-
-export type AttackConfig = {
-  t: number;
-  stagger?: number;
-  type: "spear" | "rock";
-  position: Position | Position[];
-  amount?: number;
-  rotation?: Rotation | Rotation[];
-  scatter?: number;
-};
 
 type LevelGeometry = {
   type: "rock";
@@ -30,7 +22,7 @@ type LevelGeometry = {
 export type Level = {
   name: string;
   attacks: (AttackConfig | AttackConfig[])[];
-  fish: [];
+  npcs: (NPCConfig | NPCConfig[])[];
   obstacles: LevelGeometry[];
 };
 
@@ -50,5 +42,6 @@ export const loadLevel = (state: State, n: number) => {
 
   return {
     attackScheduler: new AttackScheduler(level.attacks),
+    npcScheduler: new NPCScheduler(level.npcs),
   };
 };
