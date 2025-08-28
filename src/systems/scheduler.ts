@@ -78,7 +78,7 @@ abstract class BaseScheduler<T> {
         // Create individual configs with stagger timing
         for (let i = 0; i < amount; i++) {
           this.current.push({
-            ...config,
+            ...this.getStaggeredConfig(config, i),
             amount: 1,
             t: this.getTime(config) + i * stagger,
           } as T);
@@ -93,6 +93,7 @@ abstract class BaseScheduler<T> {
   abstract getTime(config: T): number;
   abstract getAmount(config: T): number;
   abstract getStagger(config: T): number;
+  abstract getStaggeredConfig(config: T, i: number): T;
   abstract applyConfig(state: State, config: T): void;
 }
 
@@ -107,6 +108,19 @@ export class AttackScheduler extends BaseScheduler<AttackConfig> {
 
   getStagger(config: AttackConfig): number {
     return config.stagger ?? 0;
+  }
+
+  getStaggeredConfig(config: AttackConfig, i: number): AttackConfig {
+    return {
+      ...config,
+      rotation: Array.isArray(config.rotation)
+        ? config.rotation[i]
+        : config.rotation,
+      position:
+        Array.isArray(config.position) && typeof config.position[0] !== "number"
+          ? (config.position[i] as Position)
+          : config.position,
+    };
   }
 
   applyConfig(state: State, attack: AttackConfig) {
@@ -194,6 +208,10 @@ export class NPCScheduler extends BaseScheduler<NPCConfig> {
 
   getStagger(config: NPCConfig): number {
     return config.stagger ?? 0;
+  }
+
+  getStaggeredConfig(config: NPCConfig): NPCConfig {
+    return config;
   }
 
   applyConfig(state: State, npcConfig: NPCConfig) {
