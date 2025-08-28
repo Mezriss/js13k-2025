@@ -7,13 +7,16 @@ import { AttackScheduler } from "./scheduler";
 
 const levels: Level[] = [level0];
 
+export type Position = "random" | "player" | [number, number];
+type Rotation = number | "random";
+
 export type AttackConfig = {
   t: number;
   stagger?: number;
   type: "spear" | "rock";
-  position: "random" | "player" | [number, number];
+  position: Position | Position[];
   amount?: number;
-  rotation?: number | "random" | (number | "random")[];
+  rotation?: Rotation | Rotation[];
   scatter?: number;
 };
 

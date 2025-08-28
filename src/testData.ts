@@ -1,4 +1,5 @@
 import type { FishProps } from "./entities/fish";
+import { ch, cw } from "./util/draw";
 import { Vector2 } from "./util/vector2";
 
 export const testNPC: FishProps = {
@@ -27,11 +28,14 @@ export const testBoulder = [
   [-3, -1],
 ].map((p) => new Vector2(...(p as [number, number])));
 
-export const testRectangle = [
-  [0, 0],
-  [1, 0],
-  [1, 1],
-  [0, 1],
-].map((p) =>
-  new Vector2(...(p as [number, number])).multiply(new Vector2(1000, 30)),
-);
+export const testRectangle = () =>
+  [
+    [-1, -1],
+    [1, -1],
+    [1, 1],
+    [-1, 1],
+  ].map((p) =>
+    new Vector2(...(p as [number, number])).multiply(
+      new Vector2(cw(50), ch(2)),
+    ),
+  );

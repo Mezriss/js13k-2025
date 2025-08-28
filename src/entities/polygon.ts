@@ -19,7 +19,7 @@ export class Polygon {
     this.rotation = rotation;
     this.scale = scale;
     this.vertices = shape.map((point) =>
-      point.clone().rotateAround(position, rotation).scale(scale).add(position),
+      point.clone().add(position).rotateAround(position, rotation).scale(scale),
     );
     this.aabb = {
       min: new Vector2(
@@ -41,9 +41,9 @@ export class Polygon {
     const vertices = this.points.map((point) =>
       point
         .clone()
+        .add(this.position)
         .rotateAround(this.position, rotation)
-        .scale(scale)
-        .add(this.position),
+        .scale(scale),
     );
     ctx.beginPath();
     ctx.moveTo(vertices[0].x, vertices[0].y);
