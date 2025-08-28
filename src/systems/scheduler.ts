@@ -1,7 +1,7 @@
 import type { State } from "@/game";
 import type { AttackConfig, Position } from "./level";
 import { Splitmix32 } from "@/util/util";
-import { ch, cw } from "@/util/draw";
+import { ch, cmin, cw } from "@/util/draw";
 import { Vector2 } from "@/util/vector2";
 import { SpearAttack, StoneAttack } from "@/entities/attack";
 import { testBoulder, testRectangle } from "@/testData";
@@ -14,9 +14,8 @@ export class AttackScheduler {
   current: AttackConfig[] | undefined;
   constructor(schedule: (AttackConfig | AttackConfig[])[], seed = 1) {
     this.schedule = schedule.slice();
-    const current = this.schedule.shift()!;
-    this.current = Array.isArray(current) ? current : [current];
     this.rand = new Splitmix32(seed);
+    this.setCurrent();
   }
 
   update(state: State, dt: number) {
@@ -31,31 +30,48 @@ export class AttackScheduler {
     }
     if (!this.current.length) {
       this.t = 0;
-      const next = this.schedule.shift();
-      if (next) {
-        this.current = Array.isArray(next) ? next : [next];
+      this.setCurrent();
+    }
+  }
+  setCurrent() {
+    const next = this.schedule.shift();
+    if (!next) {
+      this.current = undefined;
+      return;
+    }
+
+    const attacks = Array.isArray(next) ? next : [next];
+    this.current = [];
+
+    // Process each attack, expanding staggered attacks
+    for (const attack of attacks) {
+      const amount = attack.amount ?? 1;
+
+      if (attack.stagger && amount > 1) {
+        for (let i = 0; i < amount; i++) {
+          this.current.push({
+            ...attack,
+            amount: 1,
+            t: attack.t + i * attack.stagger,
+            rotation: Array.isArray(attack.rotation)
+              ? attack.rotation[i]
+              : attack.rotation,
+            position:
+              Array.isArray(attack.position) &&
+              typeof attack.position[0] !== "number"
+                ? attack.position[i]
+                : attack.position,
+          });
+        }
+      } else {
+        // Single attack or no stagger
+        this.current.push(attack);
       }
     }
   }
+
   applyAttack(state: State, attack: AttackConfig) {
     const amount = attack.amount ?? 1;
-    const stagger = attack.stagger ?? 0;
-
-    // Handle staggered attacks
-    if (stagger > 0 && amount > 1) {
-      for (let i = 0; i < amount; i++) {
-        const staggeredAttack = { ...attack, amount: 1 };
-        const staggerTime = this.t + i * stagger;
-
-        // For staggered attacks, we need to schedule them
-        if (!this.current) this.current = [];
-        this.current.push({
-          ...staggeredAttack,
-          t: staggerTime,
-        });
-      }
-      return;
-    }
 
     // Calculate rotation for each projectile
     const rotations = Array.from({ length: amount }, (_, i) => {
@@ -112,7 +128,7 @@ export class AttackScheduler {
       if (attack.type === "rock") {
         state.attacks.push(
           new StoneAttack(
-            new Polygon(pos, testBoulder, rot, 10),
+            new Polygon(pos, testBoulder, rot, cmin(1.8)),
             1 + this.rand.float() * 0.5,
           ),
         );

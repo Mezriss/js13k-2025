@@ -41,9 +41,9 @@ export class Polygon {
     const vertices = this.points.map((point) =>
       point
         .clone()
+        .scale(scale)
         .add(this.position)
-        .rotateAround(this.position, rotation)
-        .scale(scale),
+        .rotateAround(this.position, rotation),
     );
     ctx.beginPath();
     ctx.moveTo(vertices[0].x, vertices[0].y);
