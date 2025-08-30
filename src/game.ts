@@ -13,6 +13,7 @@ import type { Vfx } from "./entities/vfx";
 import { updateUnits } from "./util/draw";
 import type { AttackScheduler, NPCScheduler } from "./systems/scheduler";
 import { generateTexturePattern } from "./util/noise";
+import stone from "./assets/stone";
 
 export type State = {
   player: {
@@ -168,6 +169,10 @@ const draw = (ctx: CanvasRenderingContext2D) => {
   state.player.body.draw(ctx);
 
   ctx.restore();
+
+  ctx.strokeStyle = "red";
+
+  stone.draw(ctx, new Vector2(), 10);
 
   // paper-like texture
   ctx.save();

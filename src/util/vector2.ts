@@ -80,6 +80,10 @@ export class Vector2 {
     return this;
   }
 
+  get xy(): [number, number] {
+    return [this.x, this.y];
+  }
+
   static fromAngle(angle: number): Vector2 {
     return new Vector2(Math.cos(angle), Math.sin(angle));
   }
