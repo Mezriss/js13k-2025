@@ -244,7 +244,6 @@ export class NPCScheduler extends BaseScheduler<NPCConfig> {
       );
       npc.body.update(npc.position);
       state.npcs.push(npc);
-      console.info(npc, npc.position);
     }
   }
 }

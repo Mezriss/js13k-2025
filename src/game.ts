@@ -12,6 +12,7 @@ import { easing } from "./util/util";
 import type { Vfx } from "./entities/vfx";
 import { updateUnits } from "./util/draw";
 import type { AttackScheduler, NPCScheduler } from "./systems/scheduler";
+import { generateTexturePattern } from "./util/noise";
 
 export type State = {
   player: {
@@ -46,6 +47,7 @@ let ui: UI;
 let prevTime: number;
 let attackScheduler: AttackScheduler;
 let npcScheduler: NPCScheduler;
+let noise: CanvasPattern;
 
 export const init = (canvas: HTMLCanvasElement) => {
   state = {
@@ -69,6 +71,7 @@ export const init = (canvas: HTMLCanvasElement) => {
     ctx: canvas.getContext("2d") as CanvasRenderingContext2D,
   };
 
+  noise = generateTexturePattern(state.ctx);
   updateUnits();
 
   updateAnimations(state, 0);
@@ -123,12 +126,13 @@ const update = (dt: number) => {
 };
 
 const draw = (ctx: CanvasRenderingContext2D) => {
-  ctx.clearRect(
+  const screenBounds = [
     -ctx.canvas.width / 2,
     -ctx.canvas.height / 2,
     ctx.canvas.width,
     ctx.canvas.height,
-  );
+  ] as const;
+  ctx.clearRect(...screenBounds);
 
   ctx.save();
 
@@ -163,6 +167,14 @@ const draw = (ctx: CanvasRenderingContext2D) => {
 
   state.player.body.draw(ctx);
 
+  ctx.restore();
+
+  // paper-like texture
+  ctx.save();
+  ctx.fillStyle = noise;
+  ctx.globalCompositeOperation = "multiply";
+  ctx.globalAlpha = 0.1;
+  ctx.fillRect(...screenBounds);
   ctx.restore();
 
   ui.draw(ctx);
