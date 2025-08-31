@@ -166,7 +166,7 @@ const draw = (ctx: CanvasRenderingContext2D) => {
 
   ctx.strokeStyle = "red";
 
-  stone.draw(ctx, new Vector2(0, 0), 10, Math.PI / 2);
+  stone.draw(ctx, new Vector2(cw(20), ch(-20)), 10, 0);
 
   // paper-like texture
   ctx.save();
