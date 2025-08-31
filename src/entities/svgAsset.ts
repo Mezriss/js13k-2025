@@ -85,7 +85,19 @@ export class SvgAsset {
     ctx.lineWidth = cmax(0.03 * scale);
     this.paths.forEach((path, i) => {
       ctx.strokeStyle = this.stroke[i] || this.stroke[0];
-      //if (this.fill[i]) ctx.fillStyle = this.fill[i];
+      if (this.fill[i]) {
+        const fill = this.fill[i].slice();
+        const pointsY = path.map(({ points }) =>
+          points.map((point) => point.y),
+        );
+        const min = Math.min(...pointsY.flat()) * scale + position.y;
+        const max = Math.max(...pointsY.flat()) * scale + position.y;
+        const gradient = ctx.createLinearGradient(0, min, 0, max);
+        while (fill.length > 0) {
+          gradient.addColorStop(...(fill.splice(0, 2) as [number, string]));
+        }
+        ctx.fillStyle = gradient;
+      }
       ctx.beginPath();
       path.forEach(({ command, points }) => {
         ctx[command](

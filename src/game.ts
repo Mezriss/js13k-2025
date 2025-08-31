@@ -10,7 +10,7 @@ import { updateNpcs } from "./systems/npcs";
 import { UI } from "./entities/ui";
 import { easing } from "./util/util";
 import type { Vfx } from "./entities/vfx";
-import { updateUnits } from "./util/draw";
+import { ch, cw, init as initCanvas } from "./util/draw";
 import type { AttackScheduler, NPCScheduler } from "./systems/scheduler";
 import { generateTexturePattern } from "./util/noise";
 import stone from "./assets/stone";
@@ -73,7 +73,7 @@ export const init = (canvas: HTMLCanvasElement) => {
   };
 
   noise = generateTexturePattern(state.ctx);
-  updateUnits();
+  initCanvas();
 
   updateAnimations(state, 0);
 
@@ -83,8 +83,6 @@ export const init = (canvas: HTMLCanvasElement) => {
 
   prevTime = Number(document.timeline.currentTime);
   loop(prevTime);
-
-  state.ctx.translate(state.ctx.canvas.width / 2, state.ctx.canvas.height / 2);
 };
 
 const updateAnimations = (state: State, dt: number) => {
@@ -127,15 +125,11 @@ const update = (dt: number) => {
 };
 
 const draw = (ctx: CanvasRenderingContext2D) => {
-  const screenBounds = [
-    -ctx.canvas.width / 2,
-    -ctx.canvas.height / 2,
-    ctx.canvas.width,
-    ctx.canvas.height,
-  ] as const;
-  ctx.clearRect(...screenBounds);
-
+  const screenBounds = [-cw(50), -ch(50), cw(100), ch(100)] as const;
   ctx.save();
+  state.ctx.translate(cw(50), ch(50));
+
+  ctx.clearRect(...screenBounds);
 
   if (state.animations.hit > 0) {
     const shakeMagnitude = state.animations.hit * 10;
@@ -172,7 +166,7 @@ const draw = (ctx: CanvasRenderingContext2D) => {
 
   ctx.strokeStyle = "red";
 
-  stone.draw(ctx, new Vector2(), 10);
+  stone.draw(ctx, new Vector2(0, 0), 10, Math.PI / 2);
 
   // paper-like texture
   ctx.save();

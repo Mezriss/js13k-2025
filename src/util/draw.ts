@@ -4,21 +4,39 @@ let canvasW = 1;
 let canvasH = 1;
 let canvasMax = 1;
 let canvasMin = 1;
+export let isLandscape: boolean | null = null;
 
-export const updateUnits = () => {
-  const canvas = (document.getElementById("c") as HTMLCanvasElement) || {
-    width: 0,
-    height: 0,
-  };
-  canvasW = canvas.width;
-  canvasH = canvas.height;
+const resizeCanvas = () => {
+  const canvas = document.getElementById("c") as HTMLCanvasElement;
+  if (!canvas) return;
+
+  const { innerWidth: w, innerHeight: h } = window;
+  isLandscape = isLandscape ?? w > h;
+
+  const minRatio = isLandscape ? 4 / 3 : 9 / 16;
+  const maxRatio = isLandscape ? 16 / 9 : 3 / 4;
+
+  const targetRatio = Math.max(minRatio, Math.min(maxRatio, w / h));
+
+  let newW = w;
+  let newH = w / targetRatio;
+
+  if (newH > h) {
+    newH = h;
+    newW = h * targetRatio;
+  }
+
+  canvasW = canvas.width = newW;
+  canvasH = canvas.height = newH;
+
   canvasMax = Math.max(canvasW, canvasH);
   canvasMin = Math.min(canvasW, canvasH);
 };
 
-window.addEventListener("load", () => {
-  window.addEventListener("resize", updateUnits);
-});
+export const init = () => {
+  resizeCanvas();
+  window.addEventListener("resize", resizeCanvas);
+};
 
 export const cw = (n: number) => (n * canvasW) / 100;
 export const ch = (n: number) => (n * canvasH) / 100;
