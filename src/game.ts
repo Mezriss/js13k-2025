@@ -18,6 +18,7 @@ import reef from "./assets/reef";
 import wave from "./assets/wave";
 
 export type State = {
+  t: number;
   player: {
     body: Fish;
     position: Vector2;
@@ -54,6 +55,7 @@ let noise: CanvasPattern;
 
 export const init = (canvas: HTMLCanvasElement) => {
   state = {
+    t: 0,
     player: {
       body: new Fish(namazu),
       position: new Vector2(0, -30),
@@ -116,6 +118,7 @@ const loop: FrameRequestCallback = (time) => {
 };
 
 const update = (dt: number) => {
+  state.t += dt;
   attackScheduler.update(state, dt);
   npcScheduler.update(state, dt);
   updateNpcs(state, dt);
@@ -141,14 +144,25 @@ const draw = (ctx: CanvasRenderingContext2D) => {
   }
 
   reef.draw(ctx, new Vector2(0, ch(-20)), new Vector2(10, 10));
-  wave.draw(ctx, new Vector2(cw(-4), ch(-15)), new Vector2(7, 12), toRad(4));
+  const offset = easing.parabolic((state.t / 4) % 1) / 2.5;
   wave.draw(
     ctx,
-    new Vector2(cw(3.5), ch(-14.5)),
+    new Vector2(cw(-4), ch(-15 - offset)),
+    new Vector2(7, 12),
+    toRad(4),
+  );
+  wave.draw(
+    ctx,
+    new Vector2(cw(3.5), ch(-14.5 - offset)),
     new Vector2(10, 10),
     toRad(-10),
   );
-  wave.draw(ctx, new Vector2(cw(-1), ch(-14)), new Vector2(8, 10), toRad(10));
+  wave.draw(
+    ctx,
+    new Vector2(cw(-1), ch(-14 - offset)),
+    new Vector2(8, 10),
+    toRad(10),
+  );
 
   state.vfx.forEach((sfx) => sfx.draw(ctx)); // TODO sfx layers
   state.obstacles.forEach((obstacle) => {
