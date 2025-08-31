@@ -115,3 +115,5 @@ export class Splitmix32 {
     return Math.floor(this.rnd() * (max - min + 1)) + min;
   }
 }
+
+export const toRad = (deg: number) => (deg * Math.PI) / 180;

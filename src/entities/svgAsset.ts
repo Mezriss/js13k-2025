@@ -34,13 +34,13 @@ export class SvgAsset {
     command: (typeof commandNames)[keyof typeof commandNames];
     points: Vector2[];
   }[][];
-  stroke: string[];
-  fill: ((string | number)[] | undefined)[];
+  stroke: (string | undefined | null)[];
+  fill: ((string | number)[] | undefined | string)[];
 
   constructor(
     pathData: string,
-    stroke: string[],
-    fill: ((string | number)[] | undefined)[],
+    stroke: (string | undefined | null)[],
+    fill: ((string | number)[] | undefined | string)[],
   ) {
     this.paths = pathData.split("\n").map((path) => {
       const commands: {
@@ -79,24 +79,28 @@ export class SvgAsset {
   draw(
     ctx: CanvasRenderingContext2D,
     position: Vector2,
-    scale = 1,
+    scale = new Vector2(1, 1),
     rotation = 0,
   ) {
-    ctx.lineWidth = cmax(0.03 * scale);
+    ctx.lineWidth = cmax(0.03 * Math.min(scale.x, scale.y));
     this.paths.forEach((path, i) => {
-      ctx.strokeStyle = this.stroke[i] || this.stroke[0];
+      ctx.strokeStyle = this.stroke[i] || this.stroke[0]!;
       if (this.fill[i]) {
-        const fill = this.fill[i].slice();
-        const pointsY = path.map(({ points }) =>
-          points.map((point) => point.y),
-        );
-        const min = Math.min(...pointsY.flat()) * scale + position.y;
-        const max = Math.max(...pointsY.flat()) * scale + position.y;
-        const gradient = ctx.createLinearGradient(0, min, 0, max);
-        while (fill.length > 0) {
-          gradient.addColorStop(...(fill.splice(0, 2) as [number, string]));
+        if (Array.isArray(this.fill[i])) {
+          const fill = this.fill[i].slice();
+          const pointsY = path.map(({ points }) =>
+            points.map((point) => point.y),
+          );
+          const min = Math.min(...pointsY.flat()) * scale.y + position.y;
+          const max = Math.max(...pointsY.flat()) * scale.y + position.y;
+          const gradient = ctx.createLinearGradient(0, min, 0, max);
+          while (fill.length > 0) {
+            gradient.addColorStop(...(fill.splice(0, 2) as [number, string]));
+          }
+          ctx.fillStyle = gradient;
+        } else {
+          ctx.fillStyle = this.fill[i];
         }
-        ctx.fillStyle = gradient;
       }
       ctx.beginPath();
       path.forEach(({ command, points }) => {
@@ -106,7 +110,7 @@ export class SvgAsset {
               (point) =>
                 point
                   .clone()
-                  .scale(scale)
+                  .multiply(scale)
                   .add(position)
                   .rotateAround(position, rotation).xy,
             )
@@ -114,7 +118,7 @@ export class SvgAsset {
         );
       });
       if (this.fill[i]) ctx.fill();
-      ctx.stroke();
+      if (this.stroke[i] !== null) ctx.stroke();
     });
   }
 }
