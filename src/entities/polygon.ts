@@ -50,15 +50,15 @@ export class Polygon {
     screen.closePath();
   }
 
-  debugDraw(ctx: CanvasRenderingContext2D) {
-    ctx.beginPath();
-    ctx.strokeStyle = "red";
-    ctx.lineWidth = 2;
-    ctx.moveTo(this.vertices[0].x, this.vertices[0].y);
+  debugDraw() {
+    screen.ctx.beginPath();
+    screen.ctx.strokeStyle = "red";
+    screen.ctx.lineWidth = 2;
+    screen.moveTo(this.vertices[0].x, this.vertices[0].y);
     for (const point of this.vertices) {
-      ctx.lineTo(point.x, point.y);
+      screen.lineTo(point.x, point.y);
     }
-    ctx.closePath();
-    ctx.stroke();
+    screen.ctx.closePath();
+    screen.ctx.stroke();
   }
 }

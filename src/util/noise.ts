@@ -1,8 +1,8 @@
-export function generateTexturePattern(
-  ctx: CanvasRenderingContext2D,
-): CanvasPattern {
-  const TILE_SIZE = 128;
+import { screen } from "@/util/draw";
 
+const TILE_SIZE = 128;
+
+export function generateTexturePattern(): CanvasPattern {
   const offscreenCanvas = document.createElement("canvas");
   offscreenCanvas.width = TILE_SIZE;
   offscreenCanvas.height = TILE_SIZE;
@@ -18,5 +18,5 @@ export function generateTexturePattern(
   }
 
   offscreenCtx.putImageData(imageData, 0, 0);
-  return ctx.createPattern(offscreenCanvas, "repeat")!;
+  return screen.ctx.createPattern(offscreenCanvas, "repeat")!;
 }

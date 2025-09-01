@@ -42,7 +42,6 @@ export type State = {
     speed: number;
   }[];
   vfx: Vfx[];
-  ctx: CanvasRenderingContext2D;
 };
 
 let state: State;
@@ -52,7 +51,7 @@ let attackScheduler: AttackScheduler;
 let npcScheduler: NPCScheduler;
 let noise: CanvasPattern;
 
-export const init = (canvas: HTMLCanvasElement) => {
+export const init = () => {
   state = {
     t: 0,
     player: {
@@ -72,10 +71,9 @@ export const init = (canvas: HTMLCanvasElement) => {
     },
     npcs: [],
     vfx: [],
-    ctx: canvas.getContext("2d") as CanvasRenderingContext2D,
   };
 
-  noise = generateTexturePattern(state.ctx);
+  noise = generateTexturePattern();
   initCanvas();
 
   updateAnimations(state, 0);
@@ -112,7 +110,7 @@ const loop: FrameRequestCallback = (time) => {
   const dt = Math.min((time - prevTime) / 1000, minFrameDuration);
   prevTime = time;
   update(dt);
-  draw(state.ctx);
+  draw();
   requestAnimationFrame(loop);
 };
 
@@ -128,61 +126,61 @@ const update = (dt: number) => {
   ui.update(state, dt);
 };
 
-const draw = (ctx: CanvasRenderingContext2D) => {
+const draw = () => {
   const screenBounds = [-80, -45, 160, 90].map(
     (value) => value * screen.scale,
   ) as [number, number, number, number];
-  ctx.save();
-  state.ctx.translate(80 * screen.scale, 45 * screen.scale);
+  screen.ctx.save();
+  screen.ctx.translate(80 * screen.scale, 45 * screen.scale);
 
-  ctx.clearRect(...screenBounds);
+  screen.ctx.clearRect(...screenBounds);
 
   if (state.animations.hit > 0) {
     const shakeMagnitude = state.animations.hit * 10;
     const offsetX = (Math.random() * 2 - 1) * shakeMagnitude;
     const offsetY = (Math.random() * 2 - 1) * shakeMagnitude;
-    ctx.translate(offsetX, offsetY);
+    screen.ctx.translate(offsetX, offsetY);
   }
 
-  state.vfx.forEach((sfx) => sfx.draw(ctx)); // TODO sfx layers
+  state.vfx.forEach((sfx) => sfx.draw()); // TODO sfx layers
+
+  //TODO remove once reefs are done
   state.obstacles.forEach((obstacle) => {
-    ctx.fillStyle = "#666";
-    ctx.strokeStyle = "#888";
-    ctx.lineWidth = 3;
-    ctx.beginPath();
+    screen.ctx.fillStyle = "#666";
+    screen.ctx.strokeStyle = "#888";
+    screen.ctx.lineWidth = 1 * screen.scale;
+    screen.ctx.beginPath();
     obstacle.drawShape();
-    ctx.fill();
-    ctx.stroke();
+    screen.ctx.fill();
+    screen.ctx.stroke();
   });
   state.attacks.forEach((attack) => attack.draw());
-  state.npcs.forEach((npc) => npc.body.draw(ctx));
+  state.npcs.forEach((npc) => npc.body.draw());
 
   const easedCatch = easing.parabolic(state.animations.catch);
   const easedThrash = easing.parabolic(state.animations.thrash);
   const scale = 1 + Math.max(easedCatch * 0.1, easedThrash * 0.2);
 
-  ctx.save();
-  ctx.translate(state.player.position.x, state.player.position.y);
-  ctx.scale(scale, scale);
-  ctx.translate(-state.player.position.x, -state.player.position.y);
+  screen.ctx.save();
+  screen.ctx.translate(state.player.position.x, state.player.position.y);
+  screen.ctx.scale(scale, scale);
+  screen.ctx.translate(-state.player.position.x, -state.player.position.y);
 
-  state.player.body.draw(ctx);
+  state.player.body.draw();
 
-  ctx.restore();
-
-  ctx.strokeStyle = "red";
+  screen.ctx.restore();
 
   stone.draw(new Vector2(20, -20), new Vector2(1, 1), 0);
 
   // paper-like texture
-  ctx.save();
-  ctx.fillStyle = noise;
-  ctx.globalCompositeOperation = "multiply";
-  ctx.globalAlpha = 0.1;
-  ctx.fillRect(...screenBounds);
-  ctx.restore();
+  screen.ctx.save();
+  screen.ctx.fillStyle = noise;
+  screen.ctx.globalCompositeOperation = "multiply";
+  screen.ctx.globalAlpha = 0.1;
+  screen.ctx.fillRect(...screenBounds);
+  screen.ctx.restore();
 
   ui.draw();
 
-  ctx.restore();
+  screen.ctx.restore();
 };

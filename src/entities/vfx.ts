@@ -4,7 +4,7 @@ import type { Vector2 } from "../util/vector2";
 
 export type Vfx = {
   update: (dt: number) => void;
-  draw: (ctx: CanvasRenderingContext2D) => void;
+  draw: () => void;
   progress: number;
 };
 

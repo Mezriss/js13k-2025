@@ -1,7 +1,8 @@
 import { resolveChain, type Chain } from "../util/chain";
 import { drawEllipse, drawSpline } from "../util/draw";
 import { normalizeAngle, relativeAngleDiff } from "../util/util";
-import { Vector2 } from "../util/vector2";
+import { Vector2 } from "@/util/vector2";
+import { screen } from "@/util/draw";
 
 const maxAngle = Math.PI / 8;
 
@@ -61,7 +62,7 @@ export class Fish {
     );
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
+  draw() {
     const maxBodyCurve = maxAngle * (this.segmentCount - 1);
     let bodyCurve = 0;
     for (let i = 1; i < this.chain.length; i++) {
@@ -71,19 +72,19 @@ export class Fish {
       );
     }
 
-    ctx.strokeStyle = this.palette.outline;
-    ctx.fillStyle = this.palette.fins;
-    ctx.lineWidth = (this.scale * this.segmentLength) / 9;
+    screen.ctx.strokeStyle = this.palette.outline;
+    screen.ctx.fillStyle = this.palette.fins;
+    screen.ctx.lineWidth = (this.scale * this.segmentLength) / 9;
 
-    this._drawPectoralFins(ctx);
-    this._drawVentralFins(ctx);
-    this._drawCaudalFin(ctx, bodyCurve, maxBodyCurve);
-    this._drawBodyOutline(ctx);
-    this._drawDorsalFin(ctx, bodyCurve, maxBodyCurve);
-    this._drawEyes(ctx);
+    this._drawPectoralFins();
+    this._drawVentralFins();
+    this._drawCaudalFin(bodyCurve, maxBodyCurve);
+    this._drawBodyOutline();
+    this._drawDorsalFin(bodyCurve, maxBodyCurve);
+    this._drawEyes();
   }
 
-  private _drawPectoralFins(ctx: CanvasRenderingContext2D) {
+  private _drawPectoralFins() {
     const pectoralFinL = getSurfacePoint(
       this.chain[2],
       Math.PI / 2,
@@ -94,7 +95,7 @@ export class Fish {
       -Math.PI / 2,
       this.chain[2].radius,
     );
-    ctx.beginPath();
+    screen.ctx.beginPath();
     drawEllipse(
       pectoralFinL,
       this.chain[2].radius * 0.6,
@@ -107,11 +108,11 @@ export class Fish {
       this.chain[2].radius * 0.3,
       this.chain[2].angle - Math.PI * 0.4,
     );
-    ctx.stroke();
-    ctx.fill();
+    screen.ctx.stroke();
+    screen.ctx.fill();
   }
 
-  private _drawVentralFins(ctx: CanvasRenderingContext2D) {
+  private _drawVentralFins() {
     const ventralFinL = getSurfacePoint(
       this.chain[7],
       Math.PI / 2,
@@ -122,7 +123,7 @@ export class Fish {
       -Math.PI / 2,
       this.chain[7].radius,
     );
-    ctx.beginPath();
+    screen.ctx.beginPath();
     drawEllipse(
       ventralFinL,
       this.chain[7].radius * 0.6,
@@ -135,15 +136,11 @@ export class Fish {
       this.chain[7].radius * 0.3,
       this.chain[7].angle - Math.PI * 0.4,
     );
-    ctx.stroke();
-    ctx.fill();
+    screen.ctx.stroke();
+    screen.ctx.fill();
   }
 
-  private _drawCaudalFin(
-    ctx: CanvasRenderingContext2D,
-    bodyCurve: number,
-    maxBodyCurve: number,
-  ) {
+  private _drawCaudalFin(bodyCurve: number, maxBodyCurve: number) {
     const caudalFinTop = this.chain.slice(-3);
     const caudalFinBottom = caudalFinTop.toReversed().map((point, i) => {
       const maxW = this.chain[this.chain.length - 1].radius;
@@ -156,15 +153,15 @@ export class Fish {
     const caudalFin: Vector2[] = caudalFinTop
       .map((segment) => segment.joint)
       .concat(caudalFinBottom);
-    ctx.beginPath();
+    screen.ctx.beginPath();
     drawSpline(caudalFin);
-    ctx.fill();
-    ctx.beginPath();
+    screen.ctx.fill();
+    screen.ctx.beginPath();
     drawSpline(caudalFin);
-    ctx.stroke();
+    screen.ctx.stroke();
   }
 
-  private _drawBodyOutline(ctx: CanvasRenderingContext2D) {
+  private _drawBodyOutline() {
     const outline = [0.8, 1, 1.2].map((r) =>
       getSurfacePoint(this.chain[0], Math.PI * r, this.chain[0].radius),
     );
@@ -191,18 +188,14 @@ export class Fish {
         this.chain[this.bodyLength - 1].radius,
       ),
     );
-    ctx.fillStyle = this.palette.body;
-    ctx.beginPath();
+    screen.ctx.fillStyle = this.palette.body;
+    screen.ctx.beginPath();
     drawSpline(outline);
-    ctx.fill();
-    ctx.stroke();
+    screen.ctx.fill();
+    screen.ctx.stroke();
   }
 
-  private _drawDorsalFin(
-    ctx: CanvasRenderingContext2D,
-    bodyCurve: number,
-    maxBodyCurve: number,
-  ) {
+  private _drawDorsalFin(bodyCurve: number, maxBodyCurve: number) {
     const dorsalFin = [
       this.chain[3].joint,
       ...[4, 5].map((i) =>
@@ -214,52 +207,52 @@ export class Fish {
       ),
       this.chain[6].joint,
     ];
-    ctx.fillStyle = this.palette.fins;
-    ctx.beginPath();
+    screen.ctx.fillStyle = this.palette.fins;
+    screen.ctx.beginPath();
     drawSpline(dorsalFin);
-    ctx.fill();
-    ctx.beginPath();
+    screen.ctx.fill();
+    screen.ctx.beginPath();
     drawSpline(dorsalFin);
-    ctx.stroke();
+    screen.ctx.stroke();
   }
 
-  private _drawEyes(ctx: CanvasRenderingContext2D) {
+  private _drawEyes() {
     [Math.PI, -Math.PI].map((direction) => {
       const eye = getSurfacePoint(
         this.chain[0],
         direction / 2,
         this.chain[0].radius * 0.6,
       );
-      ctx.fillStyle = this.palette.eyeSclera;
-      ctx.strokeStyle = this.palette.eyeIris;
-      ctx.lineWidth = this.chain[0].radius * 0.05;
-      ctx.beginPath();
+      screen.ctx.fillStyle = this.palette.eyeSclera;
+      screen.ctx.strokeStyle = this.palette.eyeIris;
+      screen.ctx.lineWidth = this.chain[0].radius * 0.05;
+      screen.ctx.beginPath();
       drawEllipse(
         eye,
         this.chain[0].radius * 0.2,
         this.chain[0].radius * 0.25,
         this.chain[0].angle - direction * 0.2,
       );
-      ctx.fill();
-      ctx.stroke();
+      screen.ctx.fill();
+      screen.ctx.stroke();
 
-      ctx.fillStyle = this.palette.eyePupil;
-      ctx.strokeStyle = "white"; // Pupil highlight color
+      screen.ctx.fillStyle = this.palette.eyePupil;
+      screen.ctx.strokeStyle = "white"; // Pupil highlight color
       const eyeInner = getSurfacePoint(
         this.chain[0],
         direction / 2,
         this.chain[0].radius * 0.63,
       );
-      ctx.lineWidth = this.chain[0].radius * 0.07;
-      ctx.beginPath();
+      screen.ctx.lineWidth = this.chain[0].radius * 0.07;
+      screen.ctx.beginPath();
       drawEllipse(
         eyeInner,
         this.chain[0].radius * 0.1,
         this.chain[0].radius * 0.125,
         this.chain[0].angle - direction * 0.2,
       );
-      ctx.fill();
-      ctx.stroke();
+      screen.ctx.fill();
+      screen.ctx.stroke();
     });
   }
 }
