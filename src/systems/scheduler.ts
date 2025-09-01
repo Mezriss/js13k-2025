@@ -1,6 +1,5 @@
 import type { State } from "@/game";
 import { Splitmix32 } from "@/util/util";
-import { ch, cmin, cw } from "@/util/draw";
 import { Vector2 } from "@/util/vector2";
 import { SpearAttack, StoneAttack } from "@/entities/attack";
 import { testBoulder, testRectangle } from "@/testData";
@@ -145,13 +144,13 @@ export class AttackScheduler extends BaseScheduler<AttackConfig> {
       const getPosition = (pos: Position) => {
         if (pos === "random") {
           return new Vector2(
-            cw(this.rand.float(-50, 50)),
-            ch(this.rand.float(-50, 50)),
+            this.rand.float(-50, 50),
+            this.rand.float(-50, 50),
           );
         } else if (pos === "player") {
           return state.player.position.clone();
         } else {
-          return new Vector2(cw(pos[0]), ch(pos[1]));
+          return new Vector2(pos[0], pos[1]);
         }
       };
 
@@ -166,8 +165,8 @@ export class AttackScheduler extends BaseScheduler<AttackConfig> {
 
       // Apply scatter if specified
       if (attack.scatter !== undefined) {
-        pos.x += cw(this.rand.float(-attack.scatter, attack.scatter));
-        pos.y += ch(this.rand.float(-attack.scatter, attack.scatter));
+        pos.x += this.rand.float(-attack.scatter, attack.scatter);
+        pos.y += this.rand.float(-attack.scatter, attack.scatter);
       }
 
       return pos;
@@ -181,14 +180,14 @@ export class AttackScheduler extends BaseScheduler<AttackConfig> {
       if (attack.type === "rock") {
         state.attacks.push(
           new StoneAttack(
-            new Polygon(pos, testBoulder, rot, cmin(1.8)),
+            new Polygon(pos, testBoulder, rot, 1.8),
             1 + this.rand.float() * 0.5,
           ),
         );
       } else if (attack.type === "spear") {
         state.attacks.push(
           new SpearAttack(
-            new Polygon(pos, testRectangle(), rot),
+            new Polygon(pos, testRectangle(), rot, 1.5),
             1 + this.rand.float() * 0.5,
           ),
         );
@@ -217,23 +216,20 @@ export class NPCScheduler extends BaseScheduler<NPCConfig> {
   applyConfig(state: State, npcConfig: NPCConfig) {
     const amount = npcConfig.amount ?? 1;
 
-    const positions = new Vector2(
-      cw(npcConfig.position[0]),
-      ch(npcConfig.position[1]),
-    );
+    const positions = new Vector2(npcConfig.position[0], npcConfig.position[1]);
 
     for (let i = 0; i < amount; i++) {
       const scatterOffset = npcConfig.scatter
         ? new Vector2(
-            this.rand.float(cw(-npcConfig.scatter), cw(npcConfig.scatter)),
-            this.rand.float(ch(-npcConfig.scatter), ch(npcConfig.scatter)),
+            this.rand.float(-npcConfig.scatter, npcConfig.scatter),
+            this.rand.float(-npcConfig.scatter, npcConfig.scatter),
           )
         : new Vector2(0, 0);
 
       const pos = positions.clone().add(scatterOffset);
 
       const scatteredPath = npcConfig.path.map(([x, y]) =>
-        new Vector2(cw(x), ch(y)).add(scatterOffset),
+        new Vector2(x, y).add(scatterOffset),
       );
 
       const npc = initNPC(

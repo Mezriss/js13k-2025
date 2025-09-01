@@ -1,4 +1,5 @@
-import { Vector2 } from "../util/vector2";
+import { Vector2 } from "@/util/vector2";
+import { screen } from "@/util/draw";
 
 export type AABB = {
   min: Vector2;
@@ -33,11 +34,7 @@ export class Polygon {
     };
   }
 
-  drawShape(
-    ctx: CanvasRenderingContext2D,
-    scale = this.scale,
-    rotation = this.rotation,
-  ) {
+  drawShape(scale = this.scale, rotation = this.rotation) {
     const vertices = this.points.map((point) =>
       point
         .clone()
@@ -45,12 +42,12 @@ export class Polygon {
         .add(this.position)
         .rotateAround(this.position, rotation),
     );
-    ctx.beginPath();
-    ctx.moveTo(vertices[0].x, vertices[0].y);
+    screen.ctx.beginPath();
+    screen.moveTo(vertices[0].x, vertices[0].y);
     for (const point of vertices) {
-      ctx.lineTo(point.x, point.y);
+      screen.lineTo(point.x, point.y);
     }
-    ctx.closePath();
+    screen.closePath();
   }
 
   debugDraw(ctx: CanvasRenderingContext2D) {

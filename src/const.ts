@@ -15,7 +15,7 @@ export const animationDuration = {
 export const namazu: FishProps = {
   segmentLength: 45,
   segmentRadius: [49, 56, 58, 58, 53, 44, 35, 26, 22, 13, 13, 13],
-  scale: 0.2,
+  scale: 0.025,
   bodyLength: 10,
   palette: {
     outline: "#AAA",

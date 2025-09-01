@@ -1,4 +1,5 @@
 import type { Polygon } from "./polygon";
+import { screen } from "@/util/draw";
 
 export class Attack {
   shape: Polygon;
@@ -15,7 +16,7 @@ export class Attack {
     this.t += dt;
   }
 
-  draw(_ctx: CanvasRenderingContext2D) {}
+  draw() {}
 }
 
 export class StoneAttack extends Attack {
@@ -30,21 +31,21 @@ export class StoneAttack extends Attack {
     }
   }
 
-  drawHint(ctx: CanvasRenderingContext2D) {
-    ctx.strokeStyle = "rgba(255, 0, 0, 0.3)";
-    ctx.fillStyle = "rgba(255, 0, 0, 0.2)";
+  drawHint() {
+    screen.ctx.strokeStyle = "rgba(255, 0, 0, 0.3)";
+    screen.ctx.fillStyle = "rgba(255, 0, 0, 0.2)";
 
-    this.shape.drawShape(ctx);
-    ctx.fill();
-    ctx.stroke();
+    this.shape.drawShape();
+    screen.ctx.fill();
+    screen.ctx.stroke();
 
-    ctx.fillStyle = "rgba(255, 0, 0, 0.1)";
-    this.shape.drawShape(ctx, (this.shape.scale * this.t) / this.hintDuration);
-    ctx.fill();
+    screen.ctx.fillStyle = "rgba(255, 0, 0, 0.1)";
+    this.shape.drawShape((this.shape.scale * this.t) / this.hintDuration);
+    screen.ctx.fill();
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
-    this.drawHint(ctx);
+  draw() {
+    this.drawHint();
   }
 }
 
@@ -60,13 +61,13 @@ export class SpearAttack extends Attack {
     }
   }
 
-  drawHint(ctx: CanvasRenderingContext2D) {
-    ctx.strokeStyle = "rgba(255, 0, 0, 0.3)";
-    ctx.fillStyle = "rgba(255, 0, 0, 0.2)";
+  drawHint() {
+    screen.ctx.strokeStyle = "rgba(255, 0, 0, 0.3)";
+    screen.ctx.fillStyle = "rgba(255, 0, 0, 0.2)";
 
-    this.shape.drawShape(ctx);
-    ctx.fill();
-    ctx.stroke();
+    this.shape.drawShape();
+    screen.ctx.fill();
+    screen.ctx.stroke();
 
     const getHint = (n1: number, n2: number) =>
       this.shape.vertices[n1]
@@ -77,17 +78,17 @@ export class SpearAttack extends Attack {
 
     const hint = [getHint(1, 2), getHint(2, 1), getHint(3, 0), getHint(0, 3)];
 
-    ctx.fillStyle = "rgba(255, 0, 0, 0.1)";
-    ctx.beginPath();
-    ctx.moveTo(hint[0].x, hint[0].y);
+    screen.ctx.fillStyle = "rgba(255, 0, 0, 0.1)";
+    screen.ctx.beginPath();
+    screen.moveTo(hint[0].x, hint[0].y);
     for (let i = 1; i < hint.length; i++) {
-      ctx.lineTo(hint[i].x, hint[i].y);
+      screen.lineTo(hint[i].x, hint[i].y);
     }
-    ctx.closePath();
-    ctx.fill();
+    screen.ctx.closePath();
+    screen.ctx.fill();
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
-    this.drawHint(ctx);
+  draw() {
+    this.drawHint();
   }
 }

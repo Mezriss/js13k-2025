@@ -1,4 +1,4 @@
-import { cmax, drawCircle } from "../util/draw";
+import { screen, drawCircle } from "../util/draw";
 import { easing } from "../util/util";
 import type { Vector2 } from "../util/vector2";
 
@@ -19,17 +19,13 @@ export class Ripple {
   update(dt: number) {
     this.progress += dt / rippleDuration;
   }
-  draw(ctx: CanvasRenderingContext2D) {
+  draw() {
     // oklab(0.54 0.04 -0.13 / 1)
 
-    ctx.beginPath();
-    drawCircle(
-      ctx,
-      this.position,
-      easing.easeOutCubic(this.progress) * cmax(15),
-    );
-    ctx.lineWidth = cmax(9 * easing.easeOutCubic(this.progress));
-    ctx.strokeStyle = `oklab(${0.64 - 0.1 * (1 - easing.easeOutCubic(this.progress))} 0.04 -0.13 / 1)`;
-    ctx.stroke();
+    screen.ctx.beginPath();
+    drawCircle(this.position, easing.easeOutCubic(this.progress) * 15);
+    screen.ctx.lineWidth = 9 * easing.easeOutCubic(this.progress);
+    screen.ctx.strokeStyle = `oklab(${0.64 - 0.1 * (1 - easing.easeOutCubic(this.progress))} 0.04 -0.13 / 1)`;
+    screen.ctx.stroke();
   }
 }

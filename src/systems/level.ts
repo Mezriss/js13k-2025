@@ -1,4 +1,3 @@
-import { ch, cw } from "@/util/draw";
 import level0 from "../data/levels/level0";
 import { Polygon } from "../entities/polygon";
 import type { State } from "../game";
@@ -33,8 +32,8 @@ export const loadLevel = (state: State, n: number) => {
     .forEach((obstacle) => {
       state.obstacles.push(
         new Polygon(
-          new Vector2(cw(obstacle.position[0]), ch(obstacle.position[1])),
-          obstacle.shape.map(([x, y]) => new Vector2(cw(x), ch(y))),
+          new Vector2(obstacle.position[0], obstacle.position[1]),
+          obstacle.shape.map(([x, y]) => new Vector2(x, y)),
           obstacle.rotation ?? 0,
         ),
       );

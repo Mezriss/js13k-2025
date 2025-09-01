@@ -1,8 +1,4 @@
-//6065
-// 6325
-// 6629
-
-import { cmax } from "@/util/draw";
+import { screen } from "@/util/draw";
 import { Vector2 } from "@/util/vector2";
 
 const tokenizer = /[A-Z]|[+-]?\d*\.?\d+/g;
@@ -76,15 +72,10 @@ export class SvgAsset {
     this.fill = fill;
     this.stroke = stroke;
   }
-  draw(
-    ctx: CanvasRenderingContext2D,
-    position: Vector2,
-    scale = new Vector2(1, 1),
-    rotation = 0,
-  ) {
-    ctx.lineWidth = cmax(0.03 * Math.min(scale.x, scale.y));
+  draw(position: Vector2, scale = new Vector2(1, 1), rotation = 0) {
+    screen.ctx.lineWidth = 2.5 * Math.min(scale.x, scale.y);
     this.paths.forEach((path, i) => {
-      ctx.strokeStyle = this.stroke[i] || this.stroke[0]!;
+      screen.ctx.strokeStyle = this.stroke[i] || this.stroke[0]!;
       if (this.fill[i]) {
         if (Array.isArray(this.fill[i])) {
           const fill = this.fill[i].slice();
@@ -93,18 +84,23 @@ export class SvgAsset {
           );
           const min = Math.min(...pointsY.flat()) * scale.y + position.y;
           const max = Math.max(...pointsY.flat()) * scale.y + position.y;
-          const gradient = ctx.createLinearGradient(0, min, 0, max);
+          const gradient = screen.ctx.createLinearGradient(
+            0,
+            min * screen.scale,
+            0,
+            max * screen.scale,
+          );
           while (fill.length > 0) {
             gradient.addColorStop(...(fill.splice(0, 2) as [number, string]));
           }
-          ctx.fillStyle = gradient;
+          screen.ctx.fillStyle = gradient;
         } else {
-          ctx.fillStyle = this.fill[i];
+          screen.ctx.fillStyle = this.fill[i];
         }
       }
-      ctx.beginPath();
+      screen.ctx.beginPath();
       path.forEach(({ command, points }) => {
-        ctx[command](
+        screen[command](
           ...(points
             .map(
               (point) =>
@@ -117,8 +113,8 @@ export class SvgAsset {
             .flat() as [number, number, number, number, number, number]),
         );
       });
-      if (this.fill[i]) ctx.fill();
-      if (this.stroke[i] !== null) ctx.stroke();
+      if (this.fill[i]) screen.ctx.fill();
+      if (this.stroke[i] !== null) screen.ctx.stroke();
     });
   }
 }

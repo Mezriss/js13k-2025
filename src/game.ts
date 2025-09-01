@@ -1,5 +1,6 @@
 import { Fish } from "./entities/fish";
 import { Vector2 } from "./util/vector2";
+import { screen } from "./util/draw";
 import { minFrameDuration, animationDuration, namazu } from "./const";
 import { Polygon } from "./entities/polygon";
 import { updatePlayer } from "./systems/player";
@@ -8,14 +9,12 @@ import { updateThreats } from "./systems/threats";
 import { loadLevel } from "./systems/level";
 import { updateNpcs } from "./systems/npcs";
 import { UI } from "./entities/ui";
-import { easing, toRad } from "./util/util";
+import { easing } from "./util/util";
 import type { Vfx } from "./entities/vfx";
-import { ch, cw, init as initCanvas } from "./util/draw";
+import { init as initCanvas } from "./util/draw";
 import type { AttackScheduler, NPCScheduler } from "./systems/scheduler";
 import { generateTexturePattern } from "./util/noise";
 import stone from "./assets/stone";
-import reef from "./assets/reef";
-import wave from "./assets/wave";
 
 export type State = {
   t: number;
@@ -130,9 +129,11 @@ const update = (dt: number) => {
 };
 
 const draw = (ctx: CanvasRenderingContext2D) => {
-  const screenBounds = [-cw(50), -ch(50), cw(100), ch(100)] as const;
+  const screenBounds = [-80, -45, 160, 90].map(
+    (value) => value * screen.scale,
+  ) as [number, number, number, number];
   ctx.save();
-  state.ctx.translate(cw(50), ch(50));
+  state.ctx.translate(80 * screen.scale, 45 * screen.scale);
 
   ctx.clearRect(...screenBounds);
 
@@ -143,38 +144,17 @@ const draw = (ctx: CanvasRenderingContext2D) => {
     ctx.translate(offsetX, offsetY);
   }
 
-  reef.draw(ctx, new Vector2(0, ch(-20)), new Vector2(10, 10));
-  const offset = easing.parabolic((state.t / 4) % 1) / 2.5;
-  wave.draw(
-    ctx,
-    new Vector2(cw(-4), ch(-15 - offset)),
-    new Vector2(7, 12),
-    toRad(4),
-  );
-  wave.draw(
-    ctx,
-    new Vector2(cw(3.5), ch(-14.5 - offset)),
-    new Vector2(10, 10),
-    toRad(-10),
-  );
-  wave.draw(
-    ctx,
-    new Vector2(cw(-1), ch(-14 - offset)),
-    new Vector2(8, 10),
-    toRad(10),
-  );
-
   state.vfx.forEach((sfx) => sfx.draw(ctx)); // TODO sfx layers
   state.obstacles.forEach((obstacle) => {
     ctx.fillStyle = "#666";
     ctx.strokeStyle = "#888";
     ctx.lineWidth = 3;
     ctx.beginPath();
-    obstacle.drawShape(ctx);
+    obstacle.drawShape();
     ctx.fill();
     ctx.stroke();
   });
-  state.attacks.forEach((attack) => attack.draw(ctx));
+  state.attacks.forEach((attack) => attack.draw());
   state.npcs.forEach((npc) => npc.body.draw(ctx));
 
   const easedCatch = easing.parabolic(state.animations.catch);
@@ -192,7 +172,7 @@ const draw = (ctx: CanvasRenderingContext2D) => {
 
   ctx.strokeStyle = "red";
 
-  stone.draw(ctx, new Vector2(cw(20), ch(-20)), new Vector2(10, 10), 0);
+  stone.draw(new Vector2(20, -20), new Vector2(1, 1), 0);
 
   // paper-like texture
   ctx.save();
@@ -202,7 +182,7 @@ const draw = (ctx: CanvasRenderingContext2D) => {
   ctx.fillRect(...screenBounds);
   ctx.restore();
 
-  ui.draw(ctx);
+  ui.draw();
 
   ctx.restore();
 };

@@ -3,7 +3,6 @@ import { Fish, type FishProps } from "../entities/fish";
 import type { State } from "../game";
 import { testNPC } from "../testData";
 import { moveAndSlide } from "../util/collision";
-import { cmax } from "../util/draw";
 import { Vector2 } from "../util/vector2";
 
 export type NPC = {
@@ -39,7 +38,7 @@ export function updateNpcs(state: State, dt: number): void {
       .clone()
       .subtract(npc.position)
       .normalize()
-      .scale(cmax(maxSpeed * npc.speed) * dt);
+      .scale(maxSpeed * npc.speed * dt);
     npc.position.copy(moveAndSlide(npc.position, velocity, state.obstacles));
     npc.body.update(npc.position);
 

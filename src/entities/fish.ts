@@ -96,14 +96,12 @@ export class Fish {
     );
     ctx.beginPath();
     drawEllipse(
-      ctx,
       pectoralFinL,
       this.chain[2].radius * 0.6,
       this.chain[2].radius * 0.3,
       this.chain[2].angle + Math.PI * 0.4,
     );
     drawEllipse(
-      ctx,
       pectoralFinR,
       this.chain[2].radius * 0.6,
       this.chain[2].radius * 0.3,
@@ -126,14 +124,12 @@ export class Fish {
     );
     ctx.beginPath();
     drawEllipse(
-      ctx,
       ventralFinL,
       this.chain[7].radius * 0.6,
       this.chain[7].radius * 0.3,
       this.chain[7].angle + Math.PI * 0.4,
     );
     drawEllipse(
-      ctx,
       bentralFinR,
       this.chain[7].radius * 0.6,
       this.chain[7].radius * 0.3,
@@ -161,10 +157,10 @@ export class Fish {
       .map((segment) => segment.joint)
       .concat(caudalFinBottom);
     ctx.beginPath();
-    drawSpline(ctx, caudalFin);
+    drawSpline(caudalFin);
     ctx.fill();
     ctx.beginPath();
-    drawSpline(ctx, caudalFin);
+    drawSpline(caudalFin);
     ctx.stroke();
   }
 
@@ -197,7 +193,7 @@ export class Fish {
     );
     ctx.fillStyle = this.palette.body;
     ctx.beginPath();
-    drawSpline(ctx, outline);
+    drawSpline(outline);
     ctx.fill();
     ctx.stroke();
   }
@@ -220,10 +216,10 @@ export class Fish {
     ];
     ctx.fillStyle = this.palette.fins;
     ctx.beginPath();
-    drawSpline(ctx, dorsalFin);
+    drawSpline(dorsalFin);
     ctx.fill();
     ctx.beginPath();
-    drawSpline(ctx, dorsalFin);
+    drawSpline(dorsalFin);
     ctx.stroke();
   }
 
@@ -239,7 +235,6 @@ export class Fish {
       ctx.lineWidth = this.chain[0].radius * 0.05;
       ctx.beginPath();
       drawEllipse(
-        ctx,
         eye,
         this.chain[0].radius * 0.2,
         this.chain[0].radius * 0.25,
@@ -258,7 +253,6 @@ export class Fish {
       ctx.lineWidth = this.chain[0].radius * 0.07;
       ctx.beginPath();
       drawEllipse(
-        ctx,
         eyeInner,
         this.chain[0].radius * 0.1,
         this.chain[0].radius * 0.125,

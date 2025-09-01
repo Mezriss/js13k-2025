@@ -1,7 +1,8 @@
 import type { State } from "../game";
-import { ch, cmin, cw, drawCircle } from "../util/draw";
+import { drawCircle } from "../util/draw";
 import { easing, Tweened } from "../util/util";
 import { Vector2 } from "../util/vector2";
+import { screen } from "@/util/draw";
 
 export class UI {
   hp: number;
@@ -20,59 +21,59 @@ export class UI {
     this.energy.update(state.player.energy, dt);
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
-    ctx.fillStyle = "oklab(0.85 0.02 0.13 / 0.76)";
-    ctx.strokeStyle = "oklab(0.85 0.02 0.13 / 0.76)";
-    this.drawHP(ctx);
-    this.drawScore(ctx);
-    this.drawEnergy(ctx);
+  draw() {
+    screen.ctx.fillStyle = "oklab(0.85 0.02 0.13 / 0.76)";
+    screen.ctx.strokeStyle = "oklab(0.85 0.02 0.13 / 0.76)";
+    this.drawHP();
+    this.drawScore();
+    this.drawEnergy();
   }
-  drawHP(ctx: CanvasRenderingContext2D) {
+  drawHP() {
     for (let i = 0; i < this.hp; i++) {
-      ctx.beginPath();
-      drawCircle(ctx, new Vector2(cw(-45 + i * 2), ch(-45)), cmin(1));
-      ctx.fill();
+      screen.ctx.beginPath();
+      drawCircle(new Vector2(-75 + i * 3, -40), 1);
+      screen.ctx.fill();
     }
   }
-  drawScore(ctx: CanvasRenderingContext2D) {
-    ctx.font = "24px Arial";
-    ctx.textAlign = "right";
-    ctx.textBaseline = "middle";
-    ctx.fillText(
+  drawScore() {
+    screen.ctx.font = `${Math.floor(screen.scale * 3)}px Arial`;
+    screen.ctx.textAlign = "right";
+    screen.ctx.textBaseline = "middle";
+    screen.fillText(
       Math.floor(Math.floor(this.score.value)).toString().padStart(6, "0"),
-      cw(45),
-      ch(-45),
+      75,
+      -40,
     );
   }
-  drawEnergy(ctx: CanvasRenderingContext2D) {
-    ctx.lineWidth = cmin(0.2);
-    ctx.beginPath();
+  drawEnergy() {
+    screen.ctx.lineWidth = 1;
+    screen.ctx.beginPath();
     const outline: [number, number][] = [
-      [cw(-30), ch(40)],
-      [cw(30), ch(40)],
-      [cw(30), ch(45)],
-      [cw(-30), ch(45)],
+      [-30, 38],
+      [30, 38],
+      [30, 43],
+      [-30, 43],
     ];
-    ctx.moveTo(...outline[0]);
+    screen.moveTo(...outline[0]);
 
     outline.forEach(([x, y]) => {
-      ctx.lineTo(x, y);
+      screen.lineTo(x, y);
     });
-    ctx.closePath();
-    ctx.stroke();
+    screen.ctx.closePath();
+    screen.ctx.stroke();
 
-    ctx.beginPath();
+    screen.ctx.beginPath();
     const bar: [number, number][] = [
-      [cw(-29), ch(41)],
-      [cw(-29 + (58 * this.energy.value) / 100), ch(41)],
-      [cw(-29 + (58 * this.energy.value) / 100), ch(44)],
-      [cw(-29), ch(44)],
+      [-29, 39],
+      [-29 + (58 * this.energy.value) / 100, 39],
+      [-29 + (58 * this.energy.value) / 100, 42],
+      [-29, 42],
     ];
-    ctx.moveTo(...bar[0]);
+    screen.moveTo(...bar[0]);
     bar.forEach(([x, y]) => {
-      ctx.lineTo(x, y);
+      screen.lineTo(x, y);
     });
-    ctx.closePath();
-    ctx.fill();
+    screen.ctx.closePath();
+    screen.ctx.fill();
   }
 }
