@@ -24,7 +24,8 @@ export class Ripple {
 
     screen.ctx.beginPath();
     drawCircle(this.position, easing.easeOutCubic(this.progress) * 15);
-    screen.ctx.lineWidth = 9 * easing.easeOutCubic(this.progress);
+    screen.ctx.lineWidth =
+      9 * screen.scale * easing.easeOutCubic(this.progress);
     screen.ctx.strokeStyle = `oklab(${0.64 - 0.1 * (1 - easing.easeOutCubic(this.progress))} 0.04 -0.13 / 1)`;
     screen.ctx.stroke();
   }

@@ -43,7 +43,7 @@ function thrash(state: State) {
           .clone()
           .rotateAround(thrashing.pivot, Math.PI * 2 * state.animations.thrash)
           .subtract(state.player.position),
-        state.obstacles,
+        state.obstacles.map((obstacle) => obstacle.collider),
       ),
     );
     ensureBounds(state);
@@ -97,7 +97,11 @@ function handleControls(state: State, dt: number) {
   }
 
   state.player.position.copy(
-    moveAndSlide(state.player.position, state.player.velocity, state.obstacles),
+    moveAndSlide(
+      state.player.position,
+      state.player.velocity,
+      state.obstacles.map((obstacle) => obstacle.collider),
+    ),
   );
   ensureBounds(state);
 

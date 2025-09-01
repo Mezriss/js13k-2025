@@ -2,7 +2,6 @@ import { Fish } from "./entities/fish";
 import { Vector2 } from "./util/vector2";
 import { screen } from "./util/draw";
 import { minFrameDuration, animationDuration, namazu } from "./const";
-import { Polygon } from "./entities/polygon";
 import { updatePlayer } from "./systems/player";
 import type { Attack } from "./entities/attack";
 import { updateThreats } from "./systems/threats";
@@ -15,6 +14,7 @@ import { init as initCanvas } from "./util/draw";
 import type { AttackScheduler, NPCScheduler } from "./systems/scheduler";
 import { generateTexturePattern } from "./util/noise";
 import stone from "./assets/stone";
+import type { Reef } from "./entities/reef";
 
 export type State = {
   t: number;
@@ -26,7 +26,7 @@ export type State = {
     energy: number;
     score: number;
   };
-  obstacles: Polygon[];
+  obstacles: Reef[];
   attacks: Attack[];
   animations: {
     hit: number;
@@ -121,6 +121,7 @@ const update = (dt: number) => {
   updateNpcs(state, dt);
   updatePlayer(state, dt);
   updateThreats(state, dt);
+  state.obstacles.forEach((obstacle) => obstacle.update(dt));
   updateAnimations(state, dt);
   updateVfx(state, dt);
   ui.update(state, dt);
@@ -144,15 +145,8 @@ const draw = () => {
 
   state.vfx.forEach((sfx) => sfx.draw()); // TODO sfx layers
 
-  //TODO remove once reefs are done
   state.obstacles.forEach((obstacle) => {
-    screen.ctx.fillStyle = "#666";
-    screen.ctx.strokeStyle = "#888";
-    screen.ctx.lineWidth = 1 * screen.scale;
-    screen.ctx.beginPath();
-    obstacle.drawShape();
-    screen.ctx.fill();
-    screen.ctx.stroke();
+    obstacle.draw();
   });
   state.attacks.forEach((attack) => attack.draw());
   state.npcs.forEach((npc) => npc.body.draw());

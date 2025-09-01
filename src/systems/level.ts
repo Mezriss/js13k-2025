@@ -1,5 +1,5 @@
+import { Reef } from "@/entities/reef";
 import level0 from "../data/levels/level0";
-import { Polygon } from "../entities/polygon";
 import type { State } from "../game";
 import { Vector2 } from "../util/vector2";
 import {
@@ -12,10 +12,8 @@ import {
 const levels: Level[] = [level0];
 
 type LevelGeometry = {
-  type: "rock";
+  type: "reef";
   position: [number, number];
-  shape: [number, number][];
-  rotation?: number;
 };
 
 export type Level = {
@@ -28,14 +26,10 @@ export type Level = {
 export const loadLevel = (state: State, n: number) => {
   const level = levels[n];
   level.obstacles
-    .filter(({ type }) => type === "rock")
+    .filter(({ type }) => type === "reef")
     .forEach((obstacle) => {
       state.obstacles.push(
-        new Polygon(
-          new Vector2(obstacle.position[0], obstacle.position[1]),
-          obstacle.shape.map(([x, y]) => new Vector2(x, y)),
-          obstacle.rotation ?? 0,
-        ),
+        new Reef(new Vector2(obstacle.position[0], obstacle.position[1])),
       );
     });
 

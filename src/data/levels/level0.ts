@@ -4,26 +4,12 @@ export default {
   name: "Test level",
   obstacles: [
     {
-      type: "rock",
-      shape: [
-        [0, 0],
-        [0, 10],
-        [10, 10],
-        [10, 0],
-      ],
+      type: "reef",
       position: [-20, -20],
-      rotation: 0.25,
     },
     {
-      type: "rock",
-      shape: [
-        [0, 0],
-        [0, 10],
-        [10, 10],
-        [10, 0],
-      ],
+      type: "reef",
       position: [20, 20],
-      rotation: -0.25,
     },
   ],
   npcs: [

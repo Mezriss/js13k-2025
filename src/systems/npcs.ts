@@ -39,7 +39,13 @@ export function updateNpcs(state: State, dt: number): void {
       .subtract(npc.position)
       .normalize()
       .scale(maxSpeed * npc.speed * dt);
-    npc.position.copy(moveAndSlide(npc.position, velocity, state.obstacles));
+    npc.position.copy(
+      moveAndSlide(
+        npc.position,
+        velocity,
+        state.obstacles.map((obstacle) => obstacle.collider),
+      ),
+    );
     npc.body.update(npc.position);
 
     if (npc.position.clone().subtract(npc.path[0]).length < 10) {
