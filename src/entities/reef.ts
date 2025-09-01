@@ -1,6 +1,6 @@
 import reefAsset from "@/assets/reef";
 import waveAsset from "@/assets/wave";
-import { easing, toRad } from "@/util/util";
+import { easing, ensureConvex, toRad } from "@/util/util";
 import { Vector2 } from "@/util/vector2";
 import { Polygon } from "./polygon";
 
@@ -26,7 +26,7 @@ export class Reef {
           break;
       }
     });
-    this.collider = new Polygon(position, bounds, 0);
+    this.collider = new Polygon(position, ensureConvex(bounds), 0);
   }
   update(dt: number) {
     this.t += dt;
@@ -56,6 +56,6 @@ export class Reef {
       new Vector2(1, 1).multiply(reefScale),
       toRad(-5),
     );
-    this.collider.debugDraw();
+    // this.collider.debugDraw();
   }
 }

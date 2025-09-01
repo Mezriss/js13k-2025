@@ -1,3 +1,5 @@
+import type { Vector2 } from "./vector2";
+
 const TWO_PI = Math.PI * 2;
 
 export const hashStringToColor = (str: string) => {
@@ -90,6 +92,34 @@ export const easing = {
   //   return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
   // },
 };
+
+export function ensureConvex(points: Vector2[]): Vector2[] {
+  const n = points.length;
+  if (n <= 3) return points.slice();
+
+  const cross = (a: Vector2, b: Vector2, c: Vector2) =>
+    (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+
+  // assume polygon is CCW; if it's CW, we’ll detect and flip later
+  const isCCW =
+    points.reduce(
+      (s, _, i) =>
+        s + cross(points[i], points[(i + 1) % n], points[(i + 2) % n]),
+      0,
+    ) > 0;
+
+  const out: Vector2[] = [];
+  for (let i = 0; i < n; i++) {
+    const a = points[(i + n - 1) % n];
+    const b = points[i];
+    const c = points[(i + 1) % n];
+    const cr = cross(a, b, c);
+    if ((isCCW && cr >= 0) || (!isCCW && cr <= 0)) {
+      out.push(b); // keep only convex or flat corners
+    }
+  }
+  return out;
+}
 
 export class Splitmix32 {
   seed: number;
