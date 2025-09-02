@@ -1,7 +1,7 @@
 import type { State } from "@/game";
 import { Splitmix32 } from "@/util/util";
 import { Vector2 } from "@/util/vector2";
-import { StoneAttack } from "@/entities/attack";
+import { SpearAttack, StoneAttack } from "@/entities/attack";
 
 import { initNPC } from "./npcs";
 
@@ -178,15 +178,12 @@ export class AttackScheduler extends BaseScheduler<AttackConfig> {
 
       if (attack.type === "rock") {
         state.attacks.push(
-          new StoneAttack(pos, rot, 1 + this.rand.float() * 0.5, 1),
+          new StoneAttack(pos, rot, 1 + this.rand.float() * 0.5),
         );
       } else if (attack.type === "spear") {
-        // state.attacks.push(
-        //   new SpearAttack(
-        //     new Polygon(pos, testRectangle(), rot, 1.5),
-        //     1 + this.rand.float() * 0.5,
-        //   ),
-        // );
+        state.attacks.push(
+          new SpearAttack(pos, rot, 1 + this.rand.float() * 0.5),
+        );
       }
     }
   }

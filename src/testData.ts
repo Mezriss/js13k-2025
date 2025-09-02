@@ -1,5 +1,4 @@
 import type { NPC } from "./systems/npcs";
-import { Vector2 } from "./util/vector2";
 
 export const testNPC: NPC = {
   body: {
@@ -19,24 +18,3 @@ export const testNPC: NPC = {
   value: 20,
   speed: 0.8,
 };
-
-export const testBoulder = [
-  [-3, -1],
-  [-1, -3],
-  [2, -2],
-  [3, 1],
-  [1, 3],
-  [-1, 3],
-  [-3, 1],
-  [-3, -1],
-].map((p) => new Vector2(...(p as [number, number])));
-
-export const testRectangle = () =>
-  [
-    [-1, -1],
-    [1, -1],
-    [1, 1],
-    [-1, 1],
-  ].map((p) =>
-    new Vector2(...(p as [number, number])).multiply(new Vector2(50, 2)),
-  );

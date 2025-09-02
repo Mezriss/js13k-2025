@@ -29,29 +29,29 @@ export default {
     },
   ],
   attacks: [
-    {
-      t: 2,
-      type: "rock",
-      position: "random",
-      amount: 5,
-    },
-    // [
-    //   {
-    //     t: 2,
-    //     type: "spear",
-    //     position: "player",
-    //     amount: 2,
-    //     rotation: [0, 0.5],
-    //   },
-    //   {
-    //     t: 1,
-    //     type: "spear",
-    //     position: "player",
-    //     amount: 2,
-    //     rotation: [0.25, 0.75],
-    //     stagger: 0.5,
-    //   },
-    // ],
+    // {
+    //   t: 2,
+    //   type: "rock",
+    //   position: "random",
+    //   amount: 5,
+    // },
+    [
+      {
+        t: 2,
+        type: "spear",
+        position: "player",
+        amount: 2,
+        rotation: [0, 0.5],
+      },
+      {
+        t: 1,
+        type: "spear",
+        position: "player",
+        amount: 2,
+        rotation: [0.25, 0.75],
+        stagger: 0.5,
+      },
+    ],
     {
       t: 2,
       type: "rock",

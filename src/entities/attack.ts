@@ -3,24 +3,7 @@ import { Polygon } from "./polygon";
 import { screen } from "@/util/draw";
 import stone from "@/assets/stone";
 import { getBounds } from "@/util/util";
-
-export class Attack {
-  shape: Polygon;
-  hintDuration: number;
-  t = 0;
-  over = false;
-
-  constructor(shape: Polygon, hintDuration: number) {
-    this.shape = shape;
-    this.hintDuration = hintDuration;
-  }
-
-  update(dt: number) {
-    this.t += dt;
-  }
-
-  draw() {}
-}
+import spear from "@/assets/spear";
 
 export class StoneAttack {
   t = 0;
@@ -29,13 +12,13 @@ export class StoneAttack {
   attackDuration = 0.5;
   position: Vector2;
   rotation: number;
-  scale = 1;
+  scale: number;
   collider: Polygon;
   constructor(
     position: Vector2,
     rotation: number,
     hintDuration: number,
-    scale: number,
+    scale = 1,
   ) {
     this.position = position;
     this.rotation = rotation;
@@ -98,13 +81,40 @@ export class StoneAttack {
   }
 }
 
-export class SpearAttack extends Attack {
-  constructor(shape: Polygon, hintDuration: number) {
-    super(shape, hintDuration);
+const spearAttackShape = [
+  [-1, -1],
+  [1, -1],
+  [1, 1],
+  [-1, 1],
+].map((p) =>
+  new Vector2(...(p as [number, number])).multiply(new Vector2(50, 2)),
+);
+
+export class SpearAttack {
+  t = 0;
+  over = false;
+  hintDuration = 0;
+  attackDuration = 0.4;
+  position: Vector2;
+  rotation: number;
+  scale: number;
+  collider: Polygon;
+
+  constructor(
+    position: Vector2,
+    rotation: number,
+    hintDuration: number,
+    scale = 1,
+  ) {
+    this.position = position;
+    this.rotation = rotation;
+    this.collider = new Polygon(position, spearAttackShape, rotation, scale);
+    this.hintDuration = hintDuration;
+    this.scale = scale;
   }
 
   update(dt: number) {
-    super.update(dt);
+    this.t += dt;
     if (this.t > this.hintDuration) {
       this.over = true;
     }
@@ -114,16 +124,16 @@ export class SpearAttack extends Attack {
     screen.ctx.strokeStyle = "rgba(255, 0, 0, 0.3)";
     screen.ctx.fillStyle = "rgba(255, 0, 0, 0.2)";
 
-    this.shape.drawShape();
+    this.collider.drawShape();
     screen.ctx.fill();
     screen.ctx.stroke();
 
     const getHint = (n1: number, n2: number) =>
-      this.shape.vertices[n1]
+      this.collider.vertices[n1]
         .clone()
-        .subtract(this.shape.vertices[n2])
+        .subtract(this.collider.vertices[n2])
         .scale((1 - this.t / this.hintDuration) * 0.5)
-        .add(this.shape.vertices[n2]);
+        .add(this.collider.vertices[n2]);
 
     const hint = [getHint(1, 2), getHint(2, 1), getHint(3, 0), getHint(0, 3)];
 
@@ -138,6 +148,19 @@ export class SpearAttack extends Attack {
   }
 
   draw() {
-    this.drawHint();
+    const attackStart = this.hintDuration - this.attackDuration;
+    if (this.t < attackStart) return;
+    const at = this.t - attackStart;
+    spear.draw(
+      this.position
+        .clone()
+        .add(
+          Vector2.fromAngle(this.rotation).scale(
+            -screen.scale * 10 * (0.5 - at / this.attackDuration),
+          ),
+        ),
+      new Vector2(this.scale, this.scale),
+      this.rotation + Math.PI / 2,
+    );
   }
 }

@@ -56,7 +56,7 @@ export class SvgAsset {
             lastCommand = tokens.shift()!;
             break;
           default:
-            token = lastCommand;
+            token = lastCommand === "M" ? "L" : lastCommand;
         }
         commands.push({
           command: commandNames[token as keyof typeof commandNames],

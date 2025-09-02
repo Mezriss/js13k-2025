@@ -55,7 +55,7 @@ export const init = () => {
     t: 0,
     player: {
       body: new Fish(namazu),
-      position: new Vector2(0, -30),
+      position: new Vector2(0, -5),
       velocity: new Vector2(0, 0),
       hp: 3,
       energy: 50,
@@ -181,8 +181,6 @@ const draw = () => {
   drawPlayer();
 
   state.attacks.forEach((attack) => attack.draw());
-
-  //stone.draw(new Vector2(20, -20), new Vector2(1, 1), 0);
 
   postprocessing(screenBounds);
 
