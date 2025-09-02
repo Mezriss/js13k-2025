@@ -15,14 +15,14 @@ export function updateThreats(state: State, dt: number) {
       if (!chainAABB) {
         chainAABB = getChainAABB(state.player.body.chain);
       }
-      if (checkAABBOverlap(chainAABB, attack.shape.aabb)) {
+      if (checkAABBOverlap(chainAABB, attack.collider.aabb)) {
         // todo collision check
         for (let i = 0; i < state.player.body.bodyLength; i++) {
           const segment = state.player.body.chain[i];
           const collided = checkCirclePolygonCollision(
             segment.joint,
             segment.radius,
-            attack.shape,
+            attack.collider,
           );
           if (collided) {
             state.player.hp -= 1;

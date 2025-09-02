@@ -1,6 +1,11 @@
 import { screen } from "@/util/draw";
 import { Vector2 } from "@/util/vector2";
 
+export type Path = {
+  command: (typeof commandNames)[keyof typeof commandNames];
+  points: Vector2[];
+}[];
+
 const tokenizer = /[A-Z]|[+-]?\d*\.?\d+/g;
 const paramCount = {
   M: 2,
@@ -26,10 +31,7 @@ const getPoints = (arr: string[], count: number) => {
 };
 
 export class SvgAsset {
-  paths: {
-    command: (typeof commandNames)[keyof typeof commandNames];
-    points: Vector2[];
-  }[][];
+  paths: Path[];
   stroke: (string | undefined | null)[];
   fill: ((string | number)[] | undefined | string)[];
 
@@ -39,10 +41,7 @@ export class SvgAsset {
     fill: ((string | number)[] | undefined | string)[],
   ) {
     this.paths = pathData.split("\n").map((path) => {
-      const commands: {
-        command: (typeof commandNames)[keyof typeof commandNames];
-        points: Vector2[];
-      }[] = [];
+      const commands: Path = [];
       path.trim();
       const tokens = path.match(tokenizer);
       if (!tokens) return commands;
@@ -99,22 +98,31 @@ export class SvgAsset {
         }
       }
       screen.ctx.beginPath();
-      path.forEach(({ command, points }) => {
-        screen[command](
-          ...(points
-            .map(
-              (point) =>
-                point
-                  .clone()
-                  .multiply(scale)
-                  .add(position)
-                  .rotateAround(position, rotation).xy,
-            )
-            .flat() as [number, number, number, number, number, number]),
-        );
-      });
+      this.drawPath(i, position, rotation, scale);
+
       if (this.fill[i]) screen.ctx.fill();
       if (this.stroke[i] !== null) screen.ctx.stroke();
+    });
+  }
+  drawPath(
+    pathN: number,
+    position: Vector2,
+    rotation = 0,
+    scale = new Vector2(1, 1),
+  ) {
+    this.paths[pathN].forEach(({ command, points }) => {
+      screen[command](
+        ...(points
+          .map(
+            (point) =>
+              point
+                .clone()
+                .multiply(scale)
+                .add(position)
+                .rotateAround(position, rotation).xy,
+          )
+          .flat() as [number, number, number, number, number, number]),
+      );
     });
   }
 }

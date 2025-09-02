@@ -1,6 +1,6 @@
 import reefAsset from "@/assets/reef";
 import waveAsset from "@/assets/wave";
-import { easing, ensureConvex, toRad } from "@/util/util";
+import { easing, getBounds, toRad } from "@/util/util";
 import { Vector2 } from "@/util/vector2";
 import { Polygon } from "./polygon";
 
@@ -12,21 +12,10 @@ export class Reef {
   t = 0;
   constructor(position: Vector2) {
     this.position = position;
-    const bounds: Vector2[] = [];
-    reefAsset.paths[0].forEach(({ command, points }) => {
-      switch (command) {
-        case "moveTo":
-          bounds.push(points[0].clone().multiply(reefScale));
-          break;
-        case "lineTo":
-          bounds.push(points[0].clone().multiply(reefScale));
-          break;
-        case "bezierCurveTo":
-          bounds.push(points[2].clone().multiply(reefScale));
-          break;
-      }
-    });
-    this.collider = new Polygon(position, ensureConvex(bounds), 0);
+    this.collider = new Polygon(
+      position,
+      getBounds(reefAsset.paths[0], reefScale),
+    );
   }
   update(dt: number) {
     this.t += dt;

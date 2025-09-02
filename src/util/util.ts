@@ -1,3 +1,4 @@
+import type { Path } from "@/entities/svgAsset";
 import type { Vector2 } from "./vector2";
 
 const TWO_PI = Math.PI * 2;
@@ -120,6 +121,24 @@ export function ensureConvex(points: Vector2[]): Vector2[] {
   }
   return out;
 }
+
+export const getBounds = (path: Path, scale: Vector2) => {
+  const bounds: Vector2[] = [];
+  path.forEach(({ command, points }) => {
+    switch (command) {
+      case "moveTo":
+        bounds.push(points[0].clone().multiply(scale));
+        break;
+      case "lineTo":
+        bounds.push(points[0].clone().multiply(scale));
+        break;
+      case "bezierCurveTo":
+        bounds.push(points[2].clone().multiply(scale));
+        break;
+    }
+  });
+  return ensureConvex(bounds);
+};
 
 export class Splitmix32 {
   seed: number;

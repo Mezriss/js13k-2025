@@ -3,7 +3,7 @@ import { Vector2 } from "./util/vector2";
 import { screen } from "./util/draw";
 import { minFrameDuration, animationDuration, namazu } from "./const";
 import { updatePlayer } from "./systems/player";
-import type { Attack } from "./entities/attack";
+import type { StoneAttack } from "./entities/attack";
 import { updateThreats } from "./systems/threats";
 import { loadLevel } from "./systems/level";
 import { updateNpcs } from "./systems/npcs";
@@ -13,7 +13,6 @@ import type { Vfx } from "./entities/vfx";
 import { init as initCanvas } from "./util/draw";
 import type { AttackScheduler, NPCScheduler } from "./systems/scheduler";
 import { generateTexturePattern } from "./util/noise";
-import stone from "./assets/stone";
 import type { Reef } from "./entities/reef";
 
 export type State = {
@@ -27,7 +26,7 @@ export type State = {
     score: number;
   };
   obstacles: Reef[];
-  attacks: Attack[];
+  attacks: StoneAttack[];
   animations: {
     hit: number;
     catch: number;
@@ -127,30 +126,26 @@ const update = (dt: number) => {
   ui.update(state, dt);
 };
 
-const draw = () => {
-  const screenBounds = [-80, -45, 160, 90].map(
-    (value) => value * screen.scale,
-  ) as [number, number, number, number];
+const postprocessing = (screenBounds: [number, number, number, number]) => {
+  // paper-like texture
   screen.ctx.save();
-  screen.ctx.translate(80 * screen.scale, 45 * screen.scale);
+  screen.ctx.fillStyle = noise;
+  screen.ctx.globalCompositeOperation = "multiply";
+  screen.ctx.globalAlpha = 0.1;
+  screen.ctx.fillRect(...screenBounds);
+  screen.ctx.restore();
+};
 
-  screen.ctx.clearRect(...screenBounds);
-
+const applyScreenShake = () => {
   if (state.animations.hit > 0) {
     const shakeMagnitude = state.animations.hit * 10;
     const offsetX = (Math.random() * 2 - 1) * shakeMagnitude;
     const offsetY = (Math.random() * 2 - 1) * shakeMagnitude;
     screen.ctx.translate(offsetX, offsetY);
   }
+};
 
-  state.vfx.forEach((sfx) => sfx.draw()); // TODO sfx layers
-
-  state.obstacles.forEach((obstacle) => {
-    obstacle.draw();
-  });
-  state.attacks.forEach((attack) => attack.draw());
-  state.npcs.forEach((npc) => npc.body.draw());
-
+const drawPlayer = () => {
   const easedCatch = easing.parabolic(state.animations.catch);
   const easedThrash = easing.parabolic(state.animations.thrash);
   const scale = 1 + Math.max(easedCatch * 0.1, easedThrash * 0.2);
@@ -161,20 +156,38 @@ const draw = () => {
   screen.ctx.translate(-state.player.position.x, -state.player.position.y);
 
   state.player.body.draw();
-
   screen.ctx.restore();
+};
 
-  stone.draw(new Vector2(20, -20), new Vector2(1, 1), 0);
-
-  // paper-like texture
+const draw = () => {
+  const screenBounds = [-80, -45, 160, 90].map(
+    (value) => value * screen.scale,
+  ) as [number, number, number, number];
   screen.ctx.save();
-  screen.ctx.fillStyle = noise;
-  screen.ctx.globalCompositeOperation = "multiply";
-  screen.ctx.globalAlpha = 0.1;
-  screen.ctx.fillRect(...screenBounds);
-  screen.ctx.restore();
+  screen.ctx.translate(80 * screen.scale, 45 * screen.scale);
+
+  screen.ctx.clearRect(...screenBounds);
+
+  applyScreenShake();
+
+  state.vfx.forEach((sfx) => sfx.draw()); // TODO sfx layers
+
+  state.obstacles.forEach((obstacle) => {
+    obstacle.draw();
+  });
+  state.attacks.forEach((attack) => attack.drawHint());
+  state.npcs.forEach((npc) => npc.body.draw());
+
+  drawPlayer();
+
+  state.attacks.forEach((attack) => attack.draw());
+
+  //stone.draw(new Vector2(20, -20), new Vector2(1, 1), 0);
+
+  postprocessing(screenBounds);
 
   ui.draw();
 
+  // for initial translate
   screen.ctx.restore();
 };
