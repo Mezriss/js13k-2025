@@ -11,5 +11,4 @@ const spear = new SvgAsset(
     [0, "#9f9e9b", 1, "#736f6b"],
   ],
 );
-console.info(spear);
 export default spear;

@@ -14,6 +14,7 @@ import { init as initCanvas } from "./util/draw";
 import type { AttackScheduler, NPCScheduler } from "./systems/scheduler";
 import { generateTexturePattern } from "./util/noise";
 import type { Reef } from "./entities/reef";
+import { Temple } from "./entities/temple";
 
 export type State = {
   t: number;
@@ -159,6 +160,8 @@ const drawPlayer = () => {
   screen.ctx.restore();
 };
 
+const temple = new Temple(new Vector2());
+
 const draw = () => {
   const screenBounds = [-80, -45, 160, 90].map(
     (value) => value * screen.scale,
@@ -181,6 +184,8 @@ const draw = () => {
   drawPlayer();
 
   state.attacks.forEach((attack) => attack.draw());
+
+  temple.draw();
 
   postprocessing(screenBounds);
 
