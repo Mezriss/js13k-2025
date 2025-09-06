@@ -8,11 +8,12 @@ import {
   type AttackConfig,
   type NPCConfig,
 } from "./scheduler";
+import { Temple } from "@/entities/temple";
 
 const levels: Level[] = [level0];
 
 type LevelGeometry = {
-  type: "reef";
+  type: "reef" | "temple";
   position: [number, number];
 };
 
@@ -25,13 +26,18 @@ export type Level = {
 
 export const loadLevel = (state: State, n: number) => {
   const level = levels[n];
-  level.obstacles
-    .filter(({ type }) => type === "reef")
-    .forEach((obstacle) => {
+  level.obstacles.forEach((obstacle) => {
+    if (obstacle.type === "reef") {
       state.obstacles.push(
         new Reef(new Vector2(obstacle.position[0], obstacle.position[1])),
       );
-    });
+    }
+    if (obstacle.type === "temple") {
+      state.obstacles.push(
+        new Temple(new Vector2(obstacle.position[0], obstacle.position[1])),
+      );
+    }
+  });
 
   return {
     attackScheduler: new AttackScheduler(level.attacks),

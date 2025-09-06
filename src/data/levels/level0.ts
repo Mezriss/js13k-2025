@@ -11,6 +11,10 @@ export default {
       type: "reef",
       position: [20, 20],
     },
+    {
+      type: "temple",
+      position: [30, 0],
+    },
   ],
   npcs: [
     {

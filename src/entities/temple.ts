@@ -22,8 +22,6 @@ export class Temple {
   }
   draw() {
     island.draw(this.position, scale);
-    support.draw(this.position, scale);
-    bell.draw(this.position.clone().add(new Vector2(0, -0.21)), scale);
 
     const offset = easing.parabolic((this.t / 4) % 1) / 2.5;
 
@@ -44,5 +42,9 @@ export class Temple {
       new Vector2(1, 1).multiply(scale).scale(1),
       toRad(-5),
     );
+  }
+  drawForeground() {
+    support.draw(this.position, scale);
+    bell.draw(this.position.clone().add(new Vector2(0, -0.21)), scale);
   }
 }

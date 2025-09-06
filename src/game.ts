@@ -26,7 +26,7 @@ export type State = {
     energy: number;
     score: number;
   };
-  obstacles: Reef[];
+  obstacles: (Reef | Temple)[];
   attacks: StoneAttack[];
   animations: {
     hit: number;
@@ -160,8 +160,6 @@ const drawPlayer = () => {
   screen.ctx.restore();
 };
 
-const temple = new Temple(new Vector2());
-
 const draw = () => {
   const screenBounds = [-80, -45, 160, 90].map(
     (value) => value * screen.scale,
@@ -173,7 +171,7 @@ const draw = () => {
 
   applyScreenShake();
 
-  state.vfx.forEach((sfx) => sfx.draw()); // TODO sfx layers
+  state.vfx.forEach((sfx) => sfx.draw()); // TODO vfx layers
 
   state.obstacles.forEach((obstacle) => {
     obstacle.draw();
@@ -183,9 +181,11 @@ const draw = () => {
 
   drawPlayer();
 
-  state.attacks.forEach((attack) => attack.draw());
+  state.obstacles.forEach((obstacle) => {
+    if (obstacle instanceof Temple) obstacle.drawForeground?.();
+  });
 
-  temple.draw();
+  state.attacks.forEach((attack) => attack.draw());
 
   postprocessing(screenBounds);
 
