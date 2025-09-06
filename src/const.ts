@@ -27,3 +27,5 @@ export const namazu: FishProps = {
     eyePupil: "black",
   },
 };
+
+export const lsPrefix = "MZ2025SR_";

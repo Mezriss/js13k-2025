@@ -1,7 +1,7 @@
 import { Fish } from "./entities/fish";
 import { Vector2 } from "./util/vector2";
 import { screen } from "./util/draw";
-import { minFrameDuration, animationDuration, namazu } from "./const";
+import { animationDuration, namazu } from "./const";
 import { updatePlayer } from "./systems/player";
 import type { StoneAttack } from "./entities/attack";
 import { updateThreats } from "./systems/threats";
@@ -10,9 +10,8 @@ import { updateNpcs } from "./systems/npcs";
 import { UI } from "./entities/ui";
 import { easing } from "./util/util";
 import type { Vfx } from "./entities/vfx";
-import { init as initCanvas } from "./util/draw";
 import type { AttackScheduler, NPCScheduler } from "./systems/scheduler";
-import { generateTexturePattern } from "./util/noise";
+import noise from "./util/noise";
 import type { Reef } from "./entities/reef";
 import { Temple } from "./entities/temple";
 
@@ -44,47 +43,90 @@ export type State = {
   vfx: Vfx[];
 };
 
-let state: State;
-let ui: UI;
-let prevTime: number;
-let attackScheduler: AttackScheduler;
-let npcScheduler: NPCScheduler;
-let noise: CanvasPattern;
+export class GameInstance {
+  state: State;
+  ui: UI;
+  attackScheduler: AttackScheduler;
+  npcScheduler: NPCScheduler;
 
-export const init = () => {
-  state = {
-    t: 0,
-    player: {
-      body: new Fish(namazu),
-      position: new Vector2(0, -5),
-      velocity: new Vector2(0, 0),
-      hp: 3,
-      energy: 50,
-      score: 0,
-    },
-    obstacles: [],
-    attacks: [],
-    animations: {
-      hit: 0,
-      catch: 0,
-      thrash: 0,
-    },
-    npcs: [],
-    vfx: [],
-  };
+  constructor(level: number) {
+    this.state = {
+      t: 0,
+      player: {
+        body: new Fish(namazu),
+        position: new Vector2(0, -5),
+        velocity: new Vector2(0, 0),
+        hp: 3,
+        energy: 50,
+        score: 0,
+      },
+      obstacles: [],
+      attacks: [],
+      animations: {
+        hit: 0,
+        catch: 0,
+        thrash: 0,
+      },
+      npcs: [],
+      vfx: [],
+    };
 
-  noise = generateTexturePattern();
-  initCanvas();
+    updateAnimations(this.state, 0);
 
-  updateAnimations(state, 0);
+    this.ui = new UI(this.state);
 
-  ui = new UI(state);
+    const { attackScheduler, npcScheduler } = loadLevel(this.state, level);
 
-  ({ attackScheduler, npcScheduler } = loadLevel(state, 0));
+    this.attackScheduler = attackScheduler;
+    this.npcScheduler = npcScheduler;
+  }
+  update(dt: number) {
+    this.state.t += dt;
+    this.attackScheduler.update(this.state, dt);
+    this.npcScheduler.update(this.state, dt);
+    updateNpcs(this.state, dt);
+    updatePlayer(this.state, dt);
+    updateThreats(this.state, dt);
+    this.state.obstacles.forEach((obstacle) => obstacle.update(dt));
+    updateAnimations(this.state, dt);
+    updateVfx(this.state, dt);
+    this.ui.update(this.state, dt);
+  }
+  draw() {
+    const screenBounds = [-80, -45, 160, 90].map(
+      (value) => value * screen.scale,
+    ) as [number, number, number, number];
+    screen.ctx.save();
+    screen.ctx.translate(80 * screen.scale, 45 * screen.scale);
 
-  prevTime = Number(document.timeline.currentTime);
-  loop(prevTime);
-};
+    screen.ctx.clearRect(...screenBounds);
+
+    applyScreenShake(this.state);
+
+    this.state.vfx.forEach((sfx) => sfx.draw()); // TODO vfx layers
+
+    this.state.obstacles.forEach((obstacle) => {
+      obstacle.draw();
+    });
+    this.state.attacks.forEach((attack) => attack.drawHint());
+    this.state.npcs.forEach((npc) => npc.body.draw());
+
+    drawPlayer(this.state);
+
+    this.state.obstacles.forEach((obstacle) => {
+      if (obstacle instanceof Temple) obstacle.drawForeground?.();
+    });
+
+    this.state.attacks.forEach((attack) => attack.draw());
+
+    postprocessing(screenBounds);
+
+    this.ui.draw();
+
+    // for initial translate
+    screen.ctx.restore();
+  }
+}
 
 const updateAnimations = (state: State, dt: number) => {
   for (const key in state.animations) {
@@ -106,27 +148,6 @@ const updateVfx = (state: State, dt: number) => {
   }
 };
 
-const loop: FrameRequestCallback = (time) => {
-  const dt = Math.min((time - prevTime) / 1000, minFrameDuration);
-  prevTime = time;
-  update(dt);
-  draw();
-  requestAnimationFrame(loop);
-};
-
-const update = (dt: number) => {
-  state.t += dt;
-  attackScheduler.update(state, dt);
-  npcScheduler.update(state, dt);
-  updateNpcs(state, dt);
-  updatePlayer(state, dt);
-  updateThreats(state, dt);
-  state.obstacles.forEach((obstacle) => obstacle.update(dt));
-  updateAnimations(state, dt);
-  updateVfx(state, dt);
-  ui.update(state, dt);
-};
-
 const postprocessing = (screenBounds: [number, number, number, number]) => {
   // paper-like texture
   screen.ctx.save();
@@ -137,7 +158,7 @@ const postprocessing = (screenBounds: [number, number, number, number]) => {
   screen.ctx.restore();
 };
 
-const applyScreenShake = () => {
+const applyScreenShake = (state: State) => {
   if (state.animations.hit > 0) {
     const shakeMagnitude = state.animations.hit * 10;
     const offsetX = (Math.random() * 2 - 1) * shakeMagnitude;
@@ -146,7 +167,7 @@ const applyScreenShake = () => {
   }
 };
 
-const drawPlayer = () => {
+const drawPlayer = (state: State) => {
   const easedCatch = easing.parabolic(state.animations.catch);
   const easedThrash = easing.parabolic(state.animations.thrash);
   const scale = 1 + Math.max(easedCatch * 0.1, easedThrash * 0.2);
@@ -157,40 +178,5 @@ const drawPlayer = () => {
   screen.ctx.translate(-state.player.position.x, -state.player.position.y);
 
   state.player.body.draw();
-  screen.ctx.restore();
-};
-
-const draw = () => {
-  const screenBounds = [-80, -45, 160, 90].map(
-    (value) => value * screen.scale,
-  ) as [number, number, number, number];
-  screen.ctx.save();
-  screen.ctx.translate(80 * screen.scale, 45 * screen.scale);
-
-  screen.ctx.clearRect(...screenBounds);
-
-  applyScreenShake();
-
-  state.vfx.forEach((sfx) => sfx.draw()); // TODO vfx layers
-
-  state.obstacles.forEach((obstacle) => {
-    obstacle.draw();
-  });
-  state.attacks.forEach((attack) => attack.drawHint());
-  state.npcs.forEach((npc) => npc.body.draw());
-
-  drawPlayer();
-
-  state.obstacles.forEach((obstacle) => {
-    if (obstacle instanceof Temple) obstacle.drawForeground?.();
-  });
-
-  state.attacks.forEach((attack) => attack.draw());
-
-  postprocessing(screenBounds);
-
-  ui.draw();
-
-  // for initial translate
   screen.ctx.restore();
 };

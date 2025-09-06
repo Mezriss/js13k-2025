@@ -78,7 +78,7 @@ const resizeCanvas = () => {
   screen.scale = canvasWidth / 160;
 };
 
-export const init = () => {
+export const initCanvas = () => {
   resizeCanvas();
   window.addEventListener("resize", resizeCanvas);
 };
