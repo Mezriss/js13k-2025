@@ -15,8 +15,10 @@ export function updateThreats(state: State, dt: number) {
       if (!chainAABB) {
         chainAABB = getChainAABB(state.player.body.chain);
       }
-      if (checkAABBOverlap(chainAABB, attack.collider.aabb)) {
-        // todo collision check
+      if (
+        !state.animations.thrash &&
+        checkAABBOverlap(chainAABB, attack.collider.aabb)
+      ) {
         for (let i = 0; i < state.player.body.bodyLength; i++) {
           const segment = state.player.body.chain[i];
           const collided = checkCirclePolygonCollision(

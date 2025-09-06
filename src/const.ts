@@ -4,7 +4,8 @@ export const acceleration = 20;
 export const maxSpeed = 30; // max dimension %
 export const rotationSpeed = Math.PI * 8; // per second
 export const minFrameDuration = 1 / 30;
-export const thrashingCost = 10;
+export const thrashingCost = 30;
+export const thrashingRadius = 20;
 
 export const animationDuration = {
   catch: 0.5,

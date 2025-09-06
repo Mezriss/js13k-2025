@@ -80,15 +80,15 @@ export const easing = {
   parabolic(t: number) {
     return 4 * t * (1 - t);
   },
-
+  // easeInOutCubic(t: number): number {
+  //   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  // },
   // easeInQuad(t: number) {
   //   return t * t;
   // },
-
   // easeOutQuad(t: number) {
   //   return t * (2 - t);
   // },
-
   // easeInOutQuad(t: number) {
   //   return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
   // },
@@ -166,3 +166,4 @@ export class Splitmix32 {
 }
 
 export const toRad = (deg: number) => (deg * Math.PI) / 180;
+export const toDeg = (rad: number) => (rad * 180) / Math.PI;

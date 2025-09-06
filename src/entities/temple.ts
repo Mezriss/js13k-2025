@@ -11,6 +11,7 @@ const scale = new Vector2(1, 1);
 export class Temple {
   position: Vector2;
   collider: Polygon;
+  ringing = 0;
   t = 0;
 
   constructor(position: Vector2) {
@@ -19,6 +20,10 @@ export class Temple {
   }
   update(dt: number) {
     this.t += dt;
+  }
+  ring() {
+    this.ringing = this.t;
+    console.info(this.ringing);
   }
   draw() {
     island.draw(this.position, scale);
@@ -45,6 +50,15 @@ export class Temple {
   }
   drawForeground() {
     support.draw(this.position, scale);
-    bell.draw(this.position.clone().add(new Vector2(0, -0.21)), scale);
+    let bellAngle = 0;
+    if (this.ringing) {
+      const progress = ((this.t - this.ringing) % 3) / 3;
+      bellAngle = toRad(Math.sin(progress * Math.PI * 2) * 30);
+    }
+    bell.draw(
+      this.position.clone().add(new Vector2(0, -5.6)),
+      scale,
+      bellAngle,
+    );
   }
 }

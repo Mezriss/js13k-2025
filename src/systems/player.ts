@@ -1,4 +1,11 @@
-import { acceleration, maxSpeed, rotationSpeed, thrashingCost } from "../const";
+import { Temple } from "@/entities/temple";
+import {
+  acceleration,
+  maxSpeed,
+  rotationSpeed,
+  thrashingCost,
+  thrashingRadius,
+} from "../const";
 import { controls } from "../controls";
 import { Ripple } from "../entities/vfx";
 import type { State } from "../game";
@@ -18,7 +25,7 @@ function catchFish(state: State) {
         npc.body.chain[i].joint.clone().subtract(state.player.position).length <
         state.player.body.chain[0].radius / 2
       ) {
-        state.player.energy += npc.value;
+        state.player.energy = Math.min(100, state.player.energy + npc.value);
         //TODO: remove when proper scoring system is implemented
         state.player.score += 1000;
         state.animations.catch = 1;
@@ -52,11 +59,17 @@ function thrash(state: State) {
   }
 
   if (state.player.energy < thrashingCost) return;
-  state.player.energy -= thrashingCost;
   thrashing.start.copy(state.player.position);
-  thrashing.pivot.copy(state.player.body.chain[0].joint);
+  thrashing.pivot.copy(state.player.body.chain[1].joint);
   state.animations.thrash = 1;
-  state.vfx.push(new Ripple(thrashing.pivot));
+  if (state.player.energy > 10) {
+    ringBells(state);
+    state.vfx.push(new Ripple(thrashing.pivot, true));
+  } else {
+    state.player.energy -= thrashingCost;
+    state.vfx.push(new Ripple(thrashing.pivot));
+  }
+  // TODO hit boats
 }
 
 function handleControls(state: State, dt: number) {
@@ -117,3 +130,22 @@ const ensureBounds = (state: State) => {
   if (state.player.position.x > cx) state.player.position.x = cx;
   if (state.player.position.y > cy) state.player.position.y = cy;
 };
+
+function ringBells(state: State) {
+  const temples = state.obstacles.filter(
+    (obstacle) => obstacle instanceof Temple,
+  );
+  let ringing = 0;
+  temples.forEach((temple) => {
+    if (
+      temple.position.clone().subtract(thrashing.pivot).length < thrashingRadius
+    ) {
+      temple.ring();
+    }
+    if (temple.ringing) ringing += 1;
+  });
+  if (ringing === temples.length) {
+    //TODO: level win
+    // All temples are ringing
+  }
+}
