@@ -6,7 +6,7 @@ import {
   thrashingCost,
   thrashingRadius,
 } from "../const";
-import { controls } from "../controls";
+import { controls } from "../util/keyboard";
 import { Ripple } from "../entities/vfx";
 import type { State } from "../game";
 import { moveAndSlide } from "../util/collision";

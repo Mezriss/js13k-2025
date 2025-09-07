@@ -93,13 +93,10 @@ export class GameInstance {
     this.ui.update(this.state, dt);
   }
   draw() {
-    const screenBounds = [-80, -45, 160, 90].map(
-      (value) => value * screen.scale,
-    ) as [number, number, number, number];
     screen.ctx.save();
-    screen.ctx.translate(80 * screen.scale, 45 * screen.scale);
+    screen.center();
 
-    screen.ctx.clearRect(...screenBounds);
+    screen.clear();
 
     applyScreenShake(this.state);
 
@@ -119,7 +116,7 @@ export class GameInstance {
 
     this.state.attacks.forEach((attack) => attack.draw());
 
-    postprocessing(screenBounds);
+    postprocessing();
 
     this.ui.draw();
 
@@ -148,13 +145,13 @@ const updateVfx = (state: State, dt: number) => {
   }
 };
 
-const postprocessing = (screenBounds: [number, number, number, number]) => {
+const postprocessing = () => {
   // paper-like texture
   screen.ctx.save();
   screen.ctx.fillStyle = noise;
   screen.ctx.globalCompositeOperation = "multiply";
   screen.ctx.globalAlpha = 0.1;
-  screen.ctx.fillRect(...screenBounds);
+  screen.ctx.fillRect(...screen.bounds);
   screen.ctx.restore();
 };
 

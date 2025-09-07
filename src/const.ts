@@ -28,4 +28,8 @@ export const namazu: FishProps = {
   },
 };
 
-export const lsPrefix = "MZ2025SR_";
+export const lsKey = "mzŌ25";
+
+export const colors = {
+  ui: "oklab(0.85 0.02 0.13 / 0.76)",
+};

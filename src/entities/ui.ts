@@ -1,3 +1,4 @@
+import { colors } from "@/const";
 import type { State } from "../game";
 import { drawCircle } from "../util/draw";
 import { easing, Tweened } from "../util/util";
@@ -22,8 +23,8 @@ export class UI {
   }
 
   draw() {
-    screen.ctx.fillStyle = "oklab(0.85 0.02 0.13 / 0.76)";
-    screen.ctx.strokeStyle = "oklab(0.85 0.02 0.13 / 0.76)";
+    screen.ctx.fillStyle = colors.ui;
+    screen.ctx.strokeStyle = colors.ui;
     this.drawHP();
     this.drawScore();
     this.drawEnergy();

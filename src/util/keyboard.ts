@@ -16,6 +16,7 @@ for (let binding in bindings) {
 window.addEventListener("keydown", (event) => {
   if (bindingMap[event.code]) {
     controls[bindingMap[event.code]] = Date.now();
+    keyEvents.push([bindingMap[event.code], Date.now()]);
   }
 });
 window.addEventListener("keyup", (event) => {
@@ -31,3 +32,5 @@ export const controls = {
   down: 0,
   action: 0,
 };
+
+export const keyEvents: [keyof typeof bindings, number][] = [];

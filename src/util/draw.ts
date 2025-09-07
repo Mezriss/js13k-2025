@@ -4,6 +4,13 @@ const ASPECT_RATIO = 16 / 9;
 
 export const screen = {
   scale: 1,
+  bounds: [0, 0, 0, 0] as [number, number, number, number],
+  center() {
+    this.ctx.translate(80 * screen.scale, 45 * screen.scale);
+  },
+  clear() {
+    this.ctx.clearRect(...screen.bounds);
+  },
   ctx: (document.getElementById("c") as HTMLCanvasElement).getContext("2d")!,
   moveTo(x: number, y: number): void {
     this.ctx.moveTo(x * screen.scale, y * screen.scale);
@@ -58,9 +65,6 @@ export const screen = {
 };
 
 const resizeCanvas = () => {
-  const canvas = document.getElementById("c") as HTMLCanvasElement;
-  if (!canvas) return;
-
   const { innerWidth: w, innerHeight: h } = window;
 
   // Calculate canvas size to fill window while maintaining 16:9 aspect ratio
@@ -72,10 +76,17 @@ const resizeCanvas = () => {
     canvasWidth = h * ASPECT_RATIO;
   }
 
-  canvas.width = canvasWidth;
-  canvas.height = canvasHeight;
+  screen.ctx.canvas.width = canvasWidth;
+  screen.ctx.canvas.height = canvasHeight;
 
   screen.scale = canvasWidth / 160;
+
+  screen.bounds = [-80, -45, 160, 90].map((value) => value * screen.scale) as [
+    number,
+    number,
+    number,
+    number,
+  ];
 };
 
 export const initCanvas = () => {

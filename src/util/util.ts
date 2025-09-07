@@ -1,5 +1,6 @@
 import type { Path } from "@/entities/svgAsset";
 import type { Vector2 } from "./vector2";
+import { lsKey } from "@/const";
 
 const TWO_PI = Math.PI * 2;
 
@@ -167,3 +168,15 @@ export class Splitmix32 {
 
 export const toRad = (deg: number) => (deg * Math.PI) / 180;
 export const toDeg = (rad: number) => (rad * 180) / Math.PI;
+
+export function loadState() {
+  try {
+    return JSON.parse(localStorage.getItem(lsKey)!);
+  } catch {
+    return {};
+  }
+}
+
+export function saveState(state: any) {
+  localStorage.setItem(lsKey, JSON.stringify(state));
+}
