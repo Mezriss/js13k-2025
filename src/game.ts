@@ -1,7 +1,7 @@
 import { Fish } from "./entities/fish";
 import { Vector2 } from "./util/vector2";
 import { screen } from "./util/draw";
-import { animationDuration, namazu } from "./const";
+import { animationDuration, colors, lines, multipliers, namazu } from "./const";
 import { updatePlayer } from "./systems/player";
 import type { StoneAttack } from "./entities/attack";
 import { updateThreats } from "./systems/threats";
@@ -15,6 +15,7 @@ import noise from "./util/noise";
 import type { Reef } from "./entities/reef";
 import { Temple } from "./entities/temple";
 import type { Result } from "./main";
+import { state } from "./state";
 
 export type LevelState = {
   t: number;
@@ -25,6 +26,7 @@ export type LevelState = {
     hp: number;
     energy: number;
     score: number;
+    scoreMultiplier: number;
   };
   obstacles: (Reef | Temple)[];
   attacks: StoneAttack[];
@@ -42,6 +44,11 @@ export type LevelState = {
     speed: number;
   }[];
   vfx: Vfx[];
+  counters: {
+    fish: number;
+    bell: number;
+    boat: number;
+  };
 };
 
 export class GameInstance {
@@ -49,6 +56,8 @@ export class GameInstance {
   ui: UI;
   attackScheduler: AttackScheduler;
   npcScheduler: NPCScheduler;
+  level: number;
+  outro: { t: number; message: string[] } = { t: 0, message: [] };
 
   constructor(level: number) {
     this.state = {
@@ -60,6 +69,7 @@ export class GameInstance {
         hp: 3,
         energy: 0,
         score: 0,
+        scoreMultiplier: 1,
       },
       obstacles: [],
       attacks: [],
@@ -70,12 +80,18 @@ export class GameInstance {
       },
       npcs: [],
       vfx: [],
+      counters: {
+        fish: 0,
+        bell: 0,
+        boat: 0,
+      },
     };
 
     updateAnimations(this.state, 0);
 
     this.ui = new UI(this.state);
 
+    this.level = level;
     const { attackScheduler, npcScheduler } = loadLevel(this.state, level);
 
     this.attackScheduler = attackScheduler;
@@ -83,6 +99,17 @@ export class GameInstance {
   }
   update(dt: number): Result {
     this.state.t += dt;
+
+    if (this.outro.t) {
+      if (this.state.t - this.outro.t > 7) {
+        if (state.scores[this.level] < this.state.player.score) {
+          state.scores[this.level] = this.state.player.score;
+        }
+        return "menu";
+      }
+      return;
+    }
+
     this.attackScheduler.update(this.state, dt);
     this.npcScheduler.update(this.state, dt);
     updateNpcs(this.state, dt);
@@ -92,6 +119,36 @@ export class GameInstance {
     updateAnimations(this.state, dt);
     updateVfx(this.state, dt);
     this.ui.update(this.state, dt);
+
+    if (this.state.player.hp <= 0) {
+      this.outro = { t: this.state.t, message: [lines.lose] };
+    }
+    if (
+      !this.state.obstacles.some(
+        (obstacle) => obstacle instanceof Temple && !obstacle.ringing,
+      )
+    ) {
+      this.outro = { t: this.state.t, message: [lines.win] };
+    }
+    if (this.outro.t) {
+      for (const key in this.state.animations) {
+        this.state.animations[key as keyof typeof this.state.animations] = 0;
+      }
+
+      const extra: string[] = [];
+      (["bell", "fish", "boat"] as const).forEach((item) => {
+        if (this.state.counters[item]) {
+          extra.push(
+            `${lines[item]} × ${this.state.counters[item]} - ${this.state.counters[item] * multipliers[item]}`,
+          );
+        }
+      });
+
+      this.outro.message.push(`Total Score: ${this.state.player.score}`);
+      if (extra.length) {
+        this.outro.message.push("Including bonus:", ...extra);
+      }
+    }
   }
   draw() {
     screen.ctx.save();
@@ -119,9 +176,26 @@ export class GameInstance {
 
     postprocessing();
 
-    this.ui.draw();
+    if (this.outro.t) {
+      this.drawScore();
+    } else {
+      this.ui.draw();
+    }
 
     // for initial translate
+    screen.ctx.restore();
+  }
+  drawScore() {
+    screen.ctx.save();
+    //TODO animated text reveal
+    screen.ctx.fillStyle = colors.ui;
+    screen.setFont(6);
+    screen.fillText(this.outro.message[0], 0, 0);
+    screen.setFont(4);
+    for (let i = 1; i < this.outro.message.length; i++) {
+      screen.fillText(this.outro.message[i], 0, i * 5 + 5);
+    }
+
     screen.ctx.restore();
   }
 }

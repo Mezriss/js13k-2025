@@ -2,6 +2,7 @@ import { Temple } from "@/entities/temple";
 import {
   acceleration,
   maxSpeed,
+  multipliers,
   rotationSpeed,
   thrashingCost,
   thrashingRadius,
@@ -26,8 +27,8 @@ function catchFish(state: LevelState) {
         state.player.body.chain[0].radius / 2
       ) {
         state.player.energy = Math.min(100, state.player.energy + npc.value);
-        //TODO: remove when proper scoring system is implemented
-        state.player.score += 1000;
+        state.player.score += multipliers.fish;
+        state.counters.fish += 1;
         state.animations.catch = 1;
         state.npcs.splice(state.npcs.indexOf(npc), 1);
         break;
@@ -135,17 +136,15 @@ function ringBells(state: LevelState) {
   const temples = state.obstacles.filter(
     (obstacle) => obstacle instanceof Temple,
   );
-  let ringing = 0;
   temples.forEach((temple) => {
     if (
       temple.position.clone().subtract(thrashing.pivot).length < thrashingRadius
     ) {
-      temple.ring();
+      if (!temple.ringing) {
+        state.player.score += multipliers.bell;
+        state.counters.bell += 1;
+        temple.ring();
+      }
     }
-    if (temple.ringing) ringing += 1;
   });
-  if (ringing === temples.length) {
-    //TODO: level win
-    // All temples are ringing
-  }
 }

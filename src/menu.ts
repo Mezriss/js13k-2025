@@ -6,9 +6,6 @@ import { state } from "./state";
 
 const lineHeight = 6;
 
-const font = (size: number) =>
-  `${Math.floor(screen.scale * size)}px Times New Roman, serif`;
-
 export class Menu {
   menu: "start" | "continue" | "select" = "start";
   selected: number = 0;
@@ -27,13 +24,13 @@ export class Menu {
       if (now - timestamp > 1000) continue;
       if (this.menu === "start" && event === "action") {
         this.menu = "select";
-        return { switch: "intro" };
+        return "intro";
       }
       if (this.menu === "continue") {
         if (event === "action") {
           switch (this.selected) {
             case 0:
-              return { switch: "intro" };
+              return "intro";
             case 1:
               this.menu = "select";
               this.selected = 0;
@@ -49,7 +46,7 @@ export class Menu {
             this.menu = "continue";
             this.selected = 1;
           } else {
-            return { switch: this.selected };
+            return this.selected;
           }
         } else {
           switch (event) {
@@ -76,16 +73,14 @@ export class Menu {
     screen.center();
     screen.clear();
 
-    screen.ctx.font = "bold " + font(8);
-    screen.ctx.textAlign = "center";
-    screen.ctx.textBaseline = "middle";
+    screen.setFont(8);
     screen.ctx.fillStyle = "#fff";
 
     let y = 0;
     screen.fillText(title, 0, 0);
     y += lineHeight * 1.5;
 
-    screen.ctx.font = font(4);
+    screen.setFont(4);
     switch (this.menu) {
       case "start":
         this.drawStart();
@@ -117,6 +112,8 @@ export class Menu {
       const x = (-(islands.length - 1) * width) / 2 + width * i;
       screen.ctx.fillStyle = this.selected === i ? colors.ui : "#fff";
       screen.fillText(islands[i], x, lineHeight * 2.5);
+      const score = state.scores[i] ?? "-";
+      screen.fillText(score, x, lineHeight * 3.5);
     }
     screen.ctx.fillStyle =
       this.selected === islands.length ? colors.ui : "#fff";

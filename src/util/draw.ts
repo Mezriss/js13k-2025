@@ -1,3 +1,4 @@
+import { fontFamily } from "@/const";
 import type { Vector2 } from "./vector2";
 
 const ASPECT_RATIO = 16 / 9;
@@ -55,12 +56,27 @@ export const screen = {
       counterclockwise,
     );
   },
-  fillText(text: string, x: number, y: number, maxWidth?: number): void {
+  fillText(
+    text: string | number,
+    x: number,
+    y: number,
+    maxWidth?: number,
+  ): void {
     const scaledParams = [x, y].map((p) => p * screen.scale) as [
       number,
       number,
     ];
-    this.ctx.fillText(text, ...scaledParams, maxWidth);
+    this.ctx.fillText(`${text}`, ...scaledParams, maxWidth);
+  },
+  setFont(
+    size: number,
+    weight = "bold",
+    align: CanvasTextAlign = "center",
+    baseline: CanvasTextBaseline = "middle",
+  ): void {
+    this.ctx.font = `${weight} ${Math.floor(screen.scale * size)}px ${fontFamily}`;
+    this.ctx.textAlign = align;
+    this.ctx.textBaseline = baseline;
   },
 };
 

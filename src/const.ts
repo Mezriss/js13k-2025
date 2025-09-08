@@ -1,8 +1,5 @@
 import type { FishProps } from "./entities/fish";
 
-export const title = "Ōnamazu";
-export const islands = ["Yaeyama", "Kikai", "Tokara", "Izu", "Jogashima"];
-
 export const acceleration = 20;
 export const maxSpeed = 30; // max dimension %
 export const rotationSpeed = Math.PI * 8; // per second
@@ -31,8 +28,27 @@ export const namazu: FishProps = {
   },
 };
 
+export const multipliers = {
+  fish: 1000,
+  boat: 5000,
+  bell: 50000,
+};
+
 export const lsKey = "mzŌ25";
 
 export const colors = {
   ui: "oklab(0.85 0.02 0.13 / 0.76)",
+};
+
+export const fontFamily = "Times New Roman, serif";
+
+export const title = "Ōnamazu";
+export const islands = ["Yaeyama", "Kikai", "Tokara", "Izu", "Jogashima"];
+
+export const lines = {
+  win: "The quake is foretold",
+  lose: "No warning. Only ruin.",
+  bell: "bells rung",
+  fish: "fish eaten",
+  boat: "boats overturned",
 };

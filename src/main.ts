@@ -2,15 +2,12 @@ import { minFrameDuration } from "./const.ts";
 import { GameInstance } from "./game.ts";
 import { Intro } from "./intro.ts";
 import { Menu } from "./menu.ts";
-import { state, type State } from "./state.ts";
+import { state } from "./state.ts";
 import "./style.css";
 import { initCanvas } from "./util/draw.ts";
 import { saveState } from "./util/util.ts";
 
-export type Result = void | {
-  switch: number | "menu" | "intro";
-  update?: Partial<State>;
-};
+export type Result = void | number | "menu" | "intro";
 
 initCanvas();
 
@@ -27,8 +24,8 @@ export const loop: FrameRequestCallback = (time) => {
   current.draw();
   const result: Result = current.update(dt);
 
-  if (result) {
-    switch (result.switch) {
+  if (result !== undefined) {
+    switch (result) {
       case "menu":
         current = menu;
         break;
@@ -36,13 +33,10 @@ export const loop: FrameRequestCallback = (time) => {
         current = new Intro();
         break;
       default:
-        current = new GameInstance(result.switch);
+        current = new GameInstance(result);
         break;
     }
-    if (result.update) {
-      Object.assign(state, result.update);
-      saveState(state);
-    }
+    saveState(state);
   }
 
   requestAnimationFrame(loop);

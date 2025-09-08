@@ -10,9 +10,10 @@ export class Intro {
 
     if (this.t > 2) {
       if (state.intro) {
-        return { switch: "menu" };
+        return "menu";
       }
-      return { switch: 0, update: { intro: true } };
+      state.intro = true;
+      return 0;
     }
   }
   draw() {
