@@ -1,14 +1,12 @@
 import { loadState } from "./util/util";
 
-type State = {
-  mode: "menu" | "game";
+export type State = {
   scores: number[];
   intro: boolean;
 };
 
 export const state: State = {
   scores: [],
-  intro: true,
+  intro: false,
   ...loadState(),
-  mode: "menu",
 };

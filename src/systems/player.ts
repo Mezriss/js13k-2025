@@ -8,17 +8,17 @@ import {
 } from "../const";
 import { controls } from "../util/keyboard";
 import { Ripple } from "../entities/vfx";
-import type { State } from "../game";
+import type { LevelState } from "../game";
 import { moveAndSlide } from "../util/collision";
 import { normalizeAngle, relativeAngleDiff } from "../util/util";
 import { Vector2 } from "../util/vector2";
 
-export function updatePlayer(state: State, dt: number) {
+export function updatePlayer(state: LevelState, dt: number) {
   handleControls(state, dt);
   catchFish(state);
 }
 
-function catchFish(state: State) {
+function catchFish(state: LevelState) {
   for (const npc of state.npcs) {
     for (let i = 0; i < npc.body.bodyLength; i++) {
       if (
@@ -41,7 +41,7 @@ const thrashing = {
   pivot: new Vector2(),
 };
 
-function thrash(state: State) {
+function thrash(state: LevelState) {
   if (state.animations.thrash) {
     state.player.position.copy(
       moveAndSlide(
@@ -72,7 +72,7 @@ function thrash(state: State) {
   // TODO hit boats
 }
 
-function handleControls(state: State, dt: number) {
+function handleControls(state: LevelState, dt: number) {
   if (controls.action || state.animations.thrash) {
     thrash(state);
   }
@@ -121,7 +121,7 @@ function handleControls(state: State, dt: number) {
   state.player.body.update(state.player.position);
 }
 
-const ensureBounds = (state: State) => {
+const ensureBounds = (state: LevelState) => {
   const cx = 80;
   const cy = 45;
 
@@ -131,7 +131,7 @@ const ensureBounds = (state: State) => {
   if (state.player.position.y > cy) state.player.position.y = cy;
 };
 
-function ringBells(state: State) {
+function ringBells(state: LevelState) {
   const temples = state.obstacles.filter(
     (obstacle) => obstacle instanceof Temple,
   );

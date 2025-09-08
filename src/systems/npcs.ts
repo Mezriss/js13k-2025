@@ -1,6 +1,6 @@
 import { maxSpeed } from "../const";
 import { Fish, type FishProps } from "../entities/fish";
-import type { State } from "../game";
+import type { LevelState } from "../game";
 import { testNPC } from "../testData";
 import { moveAndSlide } from "../util/collision";
 import { Vector2 } from "../util/vector2";
@@ -20,7 +20,7 @@ export function initNPC(
   position: Vector2,
   path: Vector2[],
   cycle: boolean,
-): State["npcs"][number] {
+): LevelState["npcs"][number] {
   return {
     body: new Fish(npcs[variant].body),
     value: npcs[variant].value,
@@ -31,7 +31,7 @@ export function initNPC(
   };
 }
 
-export function updateNpcs(state: State, dt: number): void {
+export function updateNpcs(state: LevelState, dt: number): void {
   for (const npc of state.npcs) {
     if (!npc.path.length) continue;
     const velocity = npc.path[0]

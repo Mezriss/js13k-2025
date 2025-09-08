@@ -1,4 +1,4 @@
-import type { State } from "@/game";
+import type { LevelState } from "@/game";
 import { Splitmix32 } from "@/util/util";
 import { Vector2 } from "@/util/vector2";
 import { SpearAttack, StoneAttack } from "@/entities/attack";
@@ -41,7 +41,7 @@ abstract class BaseScheduler<T> {
     this.setCurrent();
   }
 
-  update(state: State, dt: number) {
+  update(state: LevelState, dt: number) {
     if (!this.current) return;
     this.t += dt;
     for (let i = this.current.length - 1; i >= 0; i--) {
@@ -92,7 +92,7 @@ abstract class BaseScheduler<T> {
   abstract getAmount(config: T): number;
   abstract getStagger(config: T): number;
   abstract getStaggeredConfig(config: T, i: number): T;
-  abstract applyConfig(state: State, config: T): void;
+  abstract applyConfig(state: LevelState, config: T): void;
 }
 
 export class AttackScheduler extends BaseScheduler<AttackConfig> {
@@ -121,7 +121,7 @@ export class AttackScheduler extends BaseScheduler<AttackConfig> {
     };
   }
 
-  applyConfig(state: State, attack: AttackConfig) {
+  applyConfig(state: LevelState, attack: AttackConfig) {
     const amount = attack.amount ?? 1;
 
     // Calculate rotation for each projectile
@@ -206,7 +206,7 @@ export class NPCScheduler extends BaseScheduler<NPCConfig> {
     return config;
   }
 
-  applyConfig(state: State, npcConfig: NPCConfig) {
+  applyConfig(state: LevelState, npcConfig: NPCConfig) {
     const amount = npcConfig.amount ?? 1;
 
     const positions = new Vector2(npcConfig.position[0], npcConfig.position[1]);

@@ -14,8 +14,9 @@ import type { AttackScheduler, NPCScheduler } from "./systems/scheduler";
 import noise from "./util/noise";
 import type { Reef } from "./entities/reef";
 import { Temple } from "./entities/temple";
+import type { Result } from "./main";
 
-export type State = {
+export type LevelState = {
   t: number;
   player: {
     body: Fish;
@@ -44,7 +45,7 @@ export type State = {
 };
 
 export class GameInstance {
-  state: State;
+  state: LevelState;
   ui: UI;
   attackScheduler: AttackScheduler;
   npcScheduler: NPCScheduler;
@@ -57,7 +58,7 @@ export class GameInstance {
         position: new Vector2(0, -5),
         velocity: new Vector2(0, 0),
         hp: 3,
-        energy: 50,
+        energy: 0,
         score: 0,
       },
       obstacles: [],
@@ -80,7 +81,7 @@ export class GameInstance {
     this.attackScheduler = attackScheduler;
     this.npcScheduler = npcScheduler;
   }
-  update(dt: number) {
+  update(dt: number): Result {
     this.state.t += dt;
     this.attackScheduler.update(this.state, dt);
     this.npcScheduler.update(this.state, dt);
@@ -125,17 +126,17 @@ export class GameInstance {
   }
 }
 
-const updateAnimations = (state: State, dt: number) => {
+const updateAnimations = (state: LevelState, dt: number) => {
   for (const key in state.animations) {
-    state.animations[key as keyof State["animations"]] = Math.max(
+    state.animations[key as keyof LevelState["animations"]] = Math.max(
       0,
-      state.animations[key as keyof State["animations"]] -
+      state.animations[key as keyof LevelState["animations"]] -
         dt / animationDuration[key as keyof typeof animationDuration],
     );
   }
 };
 
-const updateVfx = (state: State, dt: number) => {
+const updateVfx = (state: LevelState, dt: number) => {
   for (let i = state.vfx.length - 1; i >= 0; i--) {
     const sfx = state.vfx[i];
     sfx.update(dt);
@@ -155,7 +156,7 @@ const postprocessing = () => {
   screen.ctx.restore();
 };
 
-const applyScreenShake = (state: State) => {
+const applyScreenShake = (state: LevelState) => {
   if (state.animations.hit > 0) {
     const shakeMagnitude = state.animations.hit * 10;
     const offsetX = (Math.random() * 2 - 1) * shakeMagnitude;
@@ -164,7 +165,7 @@ const applyScreenShake = (state: State) => {
   }
 };
 
-const drawPlayer = (state: State) => {
+const drawPlayer = (state: LevelState) => {
   const easedCatch = easing.parabolic(state.animations.catch);
   const easedThrash = easing.parabolic(state.animations.thrash);
   const scale = 1 + Math.max(easedCatch * 0.1, easedThrash * 0.2);

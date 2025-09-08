@@ -1,6 +1,6 @@
 import { Reef } from "@/entities/reef";
 import level0 from "../data/levels/level0";
-import type { State } from "../game";
+import type { LevelState } from "../game";
 import { Vector2 } from "../util/vector2";
 import {
   AttackScheduler,
@@ -24,7 +24,7 @@ export type Level = {
   obstacles: LevelGeometry[];
 };
 
-export const loadLevel = (state: State, n: number) => {
+export const loadLevel = (state: LevelState, n: number) => {
   const level = levels[n];
   level.obstacles.forEach((obstacle) => {
     if (obstacle.type === "reef") {

@@ -1,12 +1,12 @@
 import { type AABB } from "../entities/polygon";
-import type { State } from "../game";
+import type { LevelState } from "../game";
 import { getChainAABB } from "../util/chain";
 import {
   checkAABBOverlap,
   checkCirclePolygonCollision,
 } from "../util/collision";
 
-export function updateThreats(state: State, dt: number) {
+export function updateThreats(state: LevelState, dt: number) {
   let chainAABB: AABB | undefined;
 
   state.attacks.forEach((attack) => {

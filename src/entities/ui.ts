@@ -1,5 +1,5 @@
 import { colors } from "@/const";
-import type { State } from "../game";
+import type { LevelState } from "../game";
 import { drawCircle } from "../util/draw";
 import { easing, Tweened } from "../util/util";
 import { Vector2 } from "../util/vector2";
@@ -10,13 +10,13 @@ export class UI {
   score: Tweened;
   energy: Tweened;
 
-  constructor(state: State) {
+  constructor(state: LevelState) {
     this.hp = state.player.hp;
     this.score = new Tweened(state.player.score, 0.5, easing.linear);
     this.energy = new Tweened(state.player.energy);
   }
 
-  update(state: State, dt: number) {
+  update(state: LevelState, dt: number) {
     this.hp = state.player.hp;
     this.score.update(state.player.score, dt);
     this.energy.update(state.player.energy, dt);

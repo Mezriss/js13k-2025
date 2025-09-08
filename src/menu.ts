@@ -1,10 +1,8 @@
 import { screen } from "./util/draw";
 import { keyEvents } from "./util/keyboard";
+import { colors, islands, title } from "./const";
+import type { Result } from "./main";
 import { state } from "./state";
-import { colors } from "./const";
-
-const title = "Ōnamazu";
-const islands = ["Yaeyama", "Kikai", "Tokara", "Izu", "Jogashima"];
 
 const lineHeight = 6;
 
@@ -22,24 +20,24 @@ export class Menu {
       this.menu = "start";
     }
   }
-  update(_dt: number) {
+  update(_dt: number): Result {
     const now = Date.now();
     while (keyEvents.length > 0) {
       const [event, timestamp] = keyEvents.shift()!;
       if (now - timestamp > 1000) continue;
       if (this.menu === "start" && event === "action") {
-        console.info("starting intro");
+        this.menu = "select";
+        return { switch: "intro" };
       }
       if (this.menu === "continue") {
         if (event === "action") {
           switch (this.selected) {
             case 0:
-              console.info("starting intro");
-              break;
+              return { switch: "intro" };
             case 1:
               this.menu = "select";
               this.selected = 0;
-              break;
+              return;
           }
         } else {
           this.selected = (this.selected + 1) % 2;
@@ -51,13 +49,12 @@ export class Menu {
             this.menu = "continue";
             this.selected = 1;
           } else {
-            console.info("starting level", this.selected);
+            return { switch: this.selected };
           }
         } else {
           switch (event) {
             case "up":
             case "down":
-              console.info("up/down");
               this.selected =
                 this.selected === islands.length ? 0 : islands.length;
               break;
