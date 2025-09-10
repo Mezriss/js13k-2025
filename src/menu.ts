@@ -7,14 +7,12 @@ import onamazu from "./assets/onamazu";
 import { Vector2 } from "./util/vector2";
 import { postprocessing } from "./util/noise";
 
-const lineHeight = 6;
-
 export class Menu {
-  menu: "start" | "continue" | "select" = "start";
+  menu: "start" | "continue" | "select";
   selected: number = 0;
   constructor() {
     if (state.intro) {
-      this.menu = "continue";
+      this.menu = "select";
       this.selected = 1;
     } else {
       this.menu = "start";
@@ -75,8 +73,14 @@ export class Menu {
     screen.ctx.save();
     screen.center();
     screen.clear();
+    wavePattern();
+    drawOnamazu();
+    screen.setFont(14);
+    screen.ctx.fillStyle = "#fff";
+    screen.fillText(title, 0, -28);
 
-    screen.setFont(4);
+    screen.setFont(4, "sans-serif");
+
     switch (this.menu) {
       case "start":
         this.drawStart();
@@ -93,37 +97,34 @@ export class Menu {
     screen.ctx.restore();
   }
   drawStart() {
-    wavePattern();
-
-    drawOnamazu();
-    screen.setFont(14);
-    screen.ctx.fillStyle = "#fff";
-    screen.fillText(title, 0, -28);
-
-    screen.setFont(4, "sans-serif");
-
     screen.ctx.fillStyle = colors.ui;
     screen.fillText("Start", 0, -5);
   }
   drawContinue() {
     screen.ctx.fillStyle = this.selected ? "#fff" : colors.ui;
-    screen.fillText("Intro", 0, lineHeight * 1.5);
+    screen.fillText("Intro", 0, -5);
     screen.ctx.fillStyle = this.selected ? colors.ui : "#fff";
-    screen.fillText("Continue", 0, lineHeight * 2.5);
+    screen.fillText("Continue", 0, 0);
   }
   drawLevelSelect() {
-    const width = 20;
-    screen.fillText("Select Stage", 0, lineHeight * 1.5);
+    const width = 10;
+    screen.setFont(3, "sans-serif");
+
+    screen.fillText("Select Stage", 0, -12);
+    screen.setFont(2, "sans-serif");
     for (let i = 0; i < islands.length; i++) {
       const x = (-(islands.length - 1) * width) / 2 + width * i;
       screen.ctx.fillStyle = this.selected === i ? colors.ui : "#fff";
-      screen.fillText(islands[i], x, lineHeight * 2.5);
+      screen.fillText(islands[i], x, -7);
       const score = state.scores[i] ?? "-";
-      screen.fillText(score, x, lineHeight * 3.5);
+
+      screen.fillText(score, x, -3);
     }
+    screen.setFont(3, "sans-serif");
+
     screen.ctx.fillStyle =
       this.selected === islands.length ? colors.ui : "#fff";
-    screen.fillText("Return", 0, lineHeight * 4.5);
+    screen.fillText("Return", 0, 5);
   }
 }
 
