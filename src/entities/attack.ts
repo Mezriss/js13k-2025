@@ -47,8 +47,8 @@ export class StoneAttack {
     stone.drawPath(
       0,
       this.position,
-      this.rotation,
       new Vector2(this.scale, this.scale),
+      this.rotation,
     );
     screen.ctx.fill();
     screen.ctx.stroke();
@@ -58,8 +58,8 @@ export class StoneAttack {
     stone.drawPath(
       0,
       this.position,
-      this.rotation,
       new Vector2(1, 1).scale((this.scale * this.t) / this.hintDuration),
+      this.rotation,
     );
     screen.ctx.fill();
   }

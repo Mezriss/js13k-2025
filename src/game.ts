@@ -11,7 +11,7 @@ import { UI } from "./entities/ui";
 import { easing } from "./util/util";
 import type { Vfx } from "./entities/vfx";
 import type { AttackScheduler, NPCScheduler } from "./systems/scheduler";
-import noise from "./util/noise";
+import { postprocessing } from "./util/noise";
 import type { Reef } from "./entities/reef";
 import { Temple } from "./entities/temple";
 import type { Result } from "./main";
@@ -27,6 +27,7 @@ export type LevelState = {
     energy: number;
     score: number;
     scoreMultiplier: number;
+    scoreTimer: number;
   };
   obstacles: (Reef | Temple)[];
   attacks: StoneAttack[];
@@ -70,6 +71,7 @@ export class GameInstance {
         energy: 0,
         score: 0,
         scoreMultiplier: 1,
+        scoreTimer: 0,
       },
       obstacles: [],
       attacks: [],
@@ -119,7 +121,11 @@ export class GameInstance {
     updateAnimations(this.state, dt);
     updateVfx(this.state, dt);
     this.ui.update(this.state, dt);
+    updateScore(this.state, dt);
 
+    this.handleLevelEnd();
+  }
+  handleLevelEnd() {
     if (this.state.player.hp <= 0) {
       this.outro = { t: this.state.t, message: [lines.lose] };
     }
@@ -200,6 +206,15 @@ export class GameInstance {
   }
 }
 
+const updateScore = (state: LevelState, dt: number) => {
+  state.player.scoreTimer += dt;
+  if (state.player.scoreTimer >= 0.5) {
+    state.player.score += state.player.scoreMultiplier;
+    state.player.scoreMultiplier += 1;
+    state.player.scoreTimer -= 0.5;
+  }
+};
+
 const updateAnimations = (state: LevelState, dt: number) => {
   for (const key in state.animations) {
     state.animations[key as keyof LevelState["animations"]] = Math.max(
@@ -218,16 +233,6 @@ const updateVfx = (state: LevelState, dt: number) => {
       state.vfx.splice(i, 1);
     }
   }
-};
-
-const postprocessing = () => {
-  // paper-like texture
-  screen.ctx.save();
-  screen.ctx.fillStyle = noise;
-  screen.ctx.globalCompositeOperation = "multiply";
-  screen.ctx.globalAlpha = 0.1;
-  screen.ctx.fillRect(...screen.bounds);
-  screen.ctx.restore();
 };
 
 const applyScreenShake = (state: LevelState) => {

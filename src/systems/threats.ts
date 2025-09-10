@@ -29,6 +29,7 @@ export function updateThreats(state: LevelState, dt: number) {
           if (collided) {
             state.player.hp -= 1;
             state.animations.hit = 1;
+            state.player.scoreMultiplier = 1;
             break;
           }
         }

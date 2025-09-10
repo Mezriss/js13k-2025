@@ -17,4 +17,14 @@ for (let i = 0; i < data.length; i += 1) {
 }
 
 offscreenCtx.putImageData(imageData, 0, 0);
-export default screen.ctx.createPattern(offscreenCanvas, "repeat")!;
+export const noise = screen.ctx.createPattern(offscreenCanvas, "repeat")!;
+
+export const postprocessing = () => {
+  // paper-like texture
+  screen.ctx.save();
+  screen.ctx.fillStyle = noise;
+  screen.ctx.globalCompositeOperation = "multiply";
+  screen.ctx.globalAlpha = 0.1;
+  screen.ctx.fillRect(...screen.bounds);
+  screen.ctx.restore();
+};

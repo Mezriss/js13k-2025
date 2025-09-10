@@ -135,7 +135,7 @@ export class SvgAsset {
         }
       }
       screen.ctx.beginPath();
-      this.drawPath(i, position, rotation, scale);
+      this.drawPath(i, position, scale, rotation);
 
       if (this.fill[i]) screen.ctx.fill();
       if (this.stroke[i] !== null) screen.ctx.stroke();
@@ -145,8 +145,8 @@ export class SvgAsset {
   drawPath(
     pathN: number,
     position: Vector2,
-    rotation = 0,
     scale = new Vector2(1, 1),
+    rotation = 0,
   ) {
     this.paths[pathN].forEach(({ command, points }) => {
       screen[command](

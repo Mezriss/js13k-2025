@@ -1,8 +1,11 @@
-import { screen } from "./util/draw";
+import { drawCircle, screen } from "./util/draw";
 import { keyEvents } from "./util/keyboard";
 import { colors, islands, title } from "./const";
 import type { Result } from "./main";
 import { state } from "./state";
+import onamazu from "./assets/onamazu";
+import { Vector2 } from "./util/vector2";
+import { postprocessing } from "./util/noise";
 
 const lineHeight = 6;
 
@@ -73,13 +76,6 @@ export class Menu {
     screen.center();
     screen.clear();
 
-    screen.setFont(8);
-    screen.ctx.fillStyle = "#fff";
-
-    let y = 0;
-    screen.fillText(title, 0, 0);
-    y += lineHeight * 1.5;
-
     screen.setFont(4);
     switch (this.menu) {
       case "start":
@@ -93,11 +89,21 @@ export class Menu {
         break;
     }
 
+    postprocessing();
     screen.ctx.restore();
   }
   drawStart() {
+    wavePattern();
+
+    drawOnamazu();
+    screen.setFont(14);
+    screen.ctx.fillStyle = "#fff";
+    screen.fillText(title, 0, -28);
+
+    screen.setFont(4, "sans-serif");
+
     screen.ctx.fillStyle = colors.ui;
-    screen.fillText("Start", 0, lineHeight * 1.5);
+    screen.fillText("Start", 0, -5);
   }
   drawContinue() {
     screen.ctx.fillStyle = this.selected ? "#fff" : colors.ui;
@@ -118,5 +124,54 @@ export class Menu {
     screen.ctx.fillStyle =
       this.selected === islands.length ? colors.ui : "#fff";
     screen.fillText("Return", 0, lineHeight * 4.5);
+  }
+}
+
+const onamazuScale = new Vector2(1, 1).scale(3);
+const drawOnamazu = () => {
+  screen.ctx.lineCap = "round";
+  screen.ctx.lineJoin = "round";
+  onamazu.body.draw(new Vector2(0, -45), onamazuScale);
+  onamazu.eyeL.draw(new Vector2(0, -45), onamazuScale);
+  onamazu.eyeR.draw(new Vector2(0, -45), onamazuScale);
+  onamazu.nostrilL.draw(new Vector2(0, -45), onamazuScale);
+  onamazu.nostrilR.draw(new Vector2(0, -45), onamazuScale);
+  onamazu.mouth.draw(new Vector2(0, -45), onamazuScale);
+
+  screen.ctx.strokeStyle = "#e9ce97";
+  screen.ctx.lineWidth = screen.scale * 0.3 * 9;
+  for (let i = 0; i < 2; i += 1) {
+    screen.ctx.beginPath();
+    onamazu.whiskers.drawPath(i, new Vector2(0, -45), onamazuScale);
+    screen.ctx.stroke();
+  }
+
+  screen.ctx.strokeStyle = "#222";
+  screen.ctx.lineWidth = screen.scale * 0.3 * 6;
+  for (let i = 0; i < 2; i += 1) {
+    screen.ctx.beginPath();
+    onamazu.whiskers.drawPath(i, new Vector2(0, -45), onamazuScale);
+    screen.ctx.stroke();
+  }
+};
+// #b0acdc #867edc
+function wavePattern(radius = 10) {
+  const lineWidth = screen.scale * 0.3 * 4;
+  screen.ctx.fillStyle = "#867edc";
+  screen.ctx.lineWidth = lineWidth;
+  screen.ctx.strokeStyle = "#b0acdc";
+  for (let y = 0; y <= (100 / radius) * 2; y += 1) {
+    for (let x = 0; x <= 160 / radius; x += 1) {
+      const position = new Vector2(
+        (x + (y % 2) / 2) * radius * 2 - 80,
+        (y * radius) / 2 - 45,
+      );
+      screen.ctx.beginPath();
+      for (let i = 0; i < 4; i += 1) {
+        drawCircle(position, radius - (radius / 3) * i);
+      }
+      screen.ctx.fill();
+      screen.ctx.stroke();
+    }
   }
 }

@@ -70,11 +70,12 @@ export const screen = {
   },
   setFont(
     size: number,
+    font = fontFamily,
     weight = "bold",
     align: CanvasTextAlign = "center",
     baseline: CanvasTextBaseline = "middle",
   ): void {
-    this.ctx.font = `${weight} ${Math.floor(screen.scale * size)}px ${fontFamily}`;
+    this.ctx.font = `${weight} ${Math.floor(screen.scale * size)}px ${font}`;
     this.ctx.textAlign = align;
     this.ctx.textBaseline = baseline;
   },
