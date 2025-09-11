@@ -1,18 +1,18 @@
-import { drawCircle, screen } from "./util/draw";
+import { screen } from "./util/draw";
 import { keyEvents } from "./util/keyboard";
 import { colors, islands, title } from "./const";
 import type { Result } from "./main";
 import { state } from "./state";
-import onamazu from "./assets/onamazu";
-import { Vector2 } from "./util/vector2";
+import { drawOnamazu } from "./assets/onamazu";
 import { postprocessing } from "./util/noise";
+import { wavePattern } from "./util/waves";
 
 export class Menu {
   menu: "start" | "continue" | "select";
   selected: number = 0;
   constructor() {
     if (state.intro) {
-      this.menu = "select";
+      this.menu = "continue";
       this.selected = 1;
     } else {
       this.menu = "start";
@@ -74,7 +74,7 @@ export class Menu {
     screen.center();
     screen.clear();
     wavePattern();
-    drawOnamazu();
+    drawOnamazu(3);
     screen.setFont(14);
     screen.ctx.fillStyle = "#fff";
     screen.fillText(title, 0, -28);
@@ -125,54 +125,5 @@ export class Menu {
     screen.ctx.fillStyle =
       this.selected === islands.length ? colors.ui : "#fff";
     screen.fillText("Return", 0, 5);
-  }
-}
-
-const onamazuScale = new Vector2(1, 1).scale(3);
-const drawOnamazu = () => {
-  screen.ctx.lineCap = "round";
-  screen.ctx.lineJoin = "round";
-  onamazu.body.draw(new Vector2(0, -45), onamazuScale);
-  onamazu.eyeL.draw(new Vector2(0, -45), onamazuScale);
-  onamazu.eyeR.draw(new Vector2(0, -45), onamazuScale);
-  onamazu.nostrilL.draw(new Vector2(0, -45), onamazuScale);
-  onamazu.nostrilR.draw(new Vector2(0, -45), onamazuScale);
-  onamazu.mouth.draw(new Vector2(0, -45), onamazuScale);
-
-  screen.ctx.strokeStyle = "#e9ce97";
-  screen.ctx.lineWidth = screen.scale * 0.3 * 9;
-  for (let i = 0; i < 2; i += 1) {
-    screen.ctx.beginPath();
-    onamazu.whiskers.drawPath(i, new Vector2(0, -45), onamazuScale);
-    screen.ctx.stroke();
-  }
-
-  screen.ctx.strokeStyle = "#222";
-  screen.ctx.lineWidth = screen.scale * 0.3 * 6;
-  for (let i = 0; i < 2; i += 1) {
-    screen.ctx.beginPath();
-    onamazu.whiskers.drawPath(i, new Vector2(0, -45), onamazuScale);
-    screen.ctx.stroke();
-  }
-};
-// #b0acdc #867edc
-function wavePattern(radius = 10) {
-  const lineWidth = screen.scale * 0.3 * 4;
-  screen.ctx.fillStyle = "#867edc";
-  screen.ctx.lineWidth = lineWidth;
-  screen.ctx.strokeStyle = "#b0acdc";
-  for (let y = 0; y <= (100 / radius) * 2; y += 1) {
-    for (let x = 0; x <= 160 / radius; x += 1) {
-      const position = new Vector2(
-        (x + (y % 2) / 2) * radius * 2 - 80,
-        (y * radius) / 2 - 45,
-      );
-      screen.ctx.beginPath();
-      for (let i = 0; i < 4; i += 1) {
-        drawCircle(position, radius - (radius / 3) * i);
-      }
-      screen.ctx.fill();
-      screen.ctx.stroke();
-    }
   }
 }

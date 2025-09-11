@@ -1,4 +1,6 @@
 import { SvgAsset } from "@/entities/svgAsset";
+import { Vector2 } from "@/util/vector2";
+import { screen } from "@/util/draw";
 
 const eyeFill = ["#e9ce97", "#688a9a", "#eee", "#222"];
 
@@ -63,4 +65,30 @@ M-4.1 19.4C-4.1 19.4-4.2 19.1-5.1 19.1-6 19.2-6.4 19.6-6.5 20.3-6.7 21-6 22.1-6.
   [],
 );
 
-export default { eyeL, eyeR, body, mouth, nostrilL, nostrilR, whiskers };
+export const drawOnamazu = (scale: number, position = new Vector2(0, -45)) => {
+  const onamazuScale = new Vector2(1, 1).scale(scale);
+  screen.ctx.lineCap = "round";
+  screen.ctx.lineJoin = "round";
+  body.draw(position, onamazuScale);
+  eyeL.draw(position, onamazuScale);
+  eyeR.draw(position, onamazuScale);
+  nostrilL.draw(position, onamazuScale);
+  nostrilR.draw(position, onamazuScale);
+  mouth.draw(position, onamazuScale);
+
+  screen.ctx.strokeStyle = "#e9ce97";
+  screen.ctx.lineWidth = screen.scale * 0.9 * scale;
+  for (let i = 0; i < 2; i += 1) {
+    screen.ctx.beginPath();
+    whiskers.drawPath(i, position, onamazuScale);
+    screen.ctx.stroke();
+  }
+
+  screen.ctx.strokeStyle = "#222";
+  screen.ctx.lineWidth = screen.scale * 0.6 * scale;
+  for (let i = 0; i < 2; i += 1) {
+    screen.ctx.beginPath();
+    whiskers.drawPath(i, position, onamazuScale);
+    screen.ctx.stroke();
+  }
+};
