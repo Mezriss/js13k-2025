@@ -11,6 +11,8 @@ export const screen = {
   },
   clear() {
     this.ctx.clearRect(...screen.bounds);
+    screen.ctx.lineCap = "round";
+    screen.ctx.lineJoin = "round";
   },
   ctx: (document.getElementById("c") as HTMLCanvasElement).getContext("2d")!,
   moveTo(x: number, y: number): void {

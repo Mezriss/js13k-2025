@@ -7,6 +7,8 @@ import { wavePattern } from "./util/waves";
 import { keyEvents } from "./util/keyboard";
 import { drawOnamazu } from "./assets/onamazu";
 import { Vector2 } from "./util/vector2";
+import { drawFisherman } from "./assets/fisherman";
+import spear from "./assets/spear";
 
 const script = [
   {
@@ -76,13 +78,18 @@ All over you!`,
   },
 ];
 
-const charDelay = 0.05;
+const charDelay = 0.03;
 
 export class Intro {
   t = 0;
   scriptIndex = 0;
   currentText = "";
   currentNarrator = "";
+  get progress() {
+    return (
+      1 - Math.min(this.t / script[this.scriptIndex].text.length / charDelay, 1)
+    );
+  }
   update(dt: number): Result {
     this.t += dt;
     const action = !!keyEvents.find((e) => e[0] === "action");
@@ -121,15 +128,35 @@ export class Intro {
     if (this.scriptIndex >= 1) {
       const position = new Vector2(0, -60);
       if (this.scriptIndex === 1) {
-        position.y -=
-          40 *
-          (1 -
-            Math.min(
-              this.t / script[this.scriptIndex].text.length / charDelay,
-              1,
-            ));
+        position.y -= 40 * this.progress;
       }
       drawOnamazu(2, position);
+    }
+
+    if (this.scriptIndex >= 5) {
+      const position = new Vector2(75, 45);
+      if (this.scriptIndex === 5) {
+        position.x += 20 * this.progress;
+      }
+      drawFisherman(0.4, position);
+    }
+
+    if (this.scriptIndex >= 9) {
+      const position = new Vector2(85, 45);
+      let spearOffset = 0;
+      if (this.scriptIndex === 9) {
+        position.x += 20 * this.progress;
+        spearOffset = 40 * this.progress;
+      }
+      spear.draw(new Vector2(-20, 20 + spearOffset), new Vector2(2, 2));
+      spear.draw(new Vector2(0, 15 + spearOffset), new Vector2(2, 2));
+      spear.draw(new Vector2(20, 20 + spearOffset), new Vector2(2, 2));
+
+      screen.ctx.save();
+      screen.ctx.translate(position.x, position.y);
+      screen.ctx.scale(-1, 1);
+      drawFisherman(0.4, position);
+      screen.ctx.restore();
     }
 
     screen.ctx.fillStyle = "rgba(0,0,0,0.5)";

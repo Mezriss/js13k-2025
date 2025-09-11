@@ -67,8 +67,7 @@ M-4.1 19.4C-4.1 19.4-4.2 19.1-5.1 19.1-6 19.2-6.4 19.6-6.5 20.3-6.7 21-6 22.1-6.
 
 export const drawOnamazu = (scale: number, position = new Vector2(0, -45)) => {
   const onamazuScale = new Vector2(1, 1).scale(scale);
-  screen.ctx.lineCap = "round";
-  screen.ctx.lineJoin = "round";
+
   body.draw(position, onamazuScale);
   eyeL.draw(position, onamazuScale);
   eyeR.draw(position, onamazuScale);
