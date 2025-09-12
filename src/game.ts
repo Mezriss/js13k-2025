@@ -104,7 +104,7 @@ export class GameInstance {
 
     if (this.outro.t) {
       if (this.state.t - this.outro.t > 7) {
-        if (state.scores[this.level] < this.state.player.score) {
+        if ((state.scores[this.level] ?? 0) < this.state.player.score) {
           state.scores[this.level] = this.state.player.score;
         }
         return "menu";

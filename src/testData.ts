@@ -16,5 +16,5 @@ export const testNPC: NPC = {
     },
   },
   value: 20,
-  speed: 0.8,
+  speed: 0.6,
 };
