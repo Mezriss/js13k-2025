@@ -32,12 +32,20 @@ export type NPCConfig = {
 abstract class BaseScheduler<T> {
   t = 0;
   rand: Splitmix32;
+  originalSchedule: (T | T[])[] = [];
   schedule: (T | T[])[] = [];
   current: T[] | undefined;
 
-  constructor(schedule: (T | T[])[], seed = 1) {
-    this.schedule = schedule.slice();
+  constructor(originalSchedule: (T | T[])[], seed = 1) {
+    this.originalSchedule = originalSchedule.slice();
+    this.schedule = originalSchedule.slice();
     this.rand = new Splitmix32(seed);
+    this.setCurrent();
+  }
+
+  reset() {
+    this.t = 0;
+    this.schedule = this.originalSchedule.slice();
     this.setCurrent();
   }
 
