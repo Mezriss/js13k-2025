@@ -117,14 +117,8 @@ export class GameInstance {
   update(dt: number): Result {
     this.state.t += dt;
 
-    if (!this.state.outro.t) {
-      const attacksOver = this.attackScheduler.update(this.state, dt);
-      const npcsOver = this.npcScheduler.update(this.state, dt);
-      if (attacksOver && npcsOver) {
-        this.attackScheduler.reset();
-        this.npcScheduler.reset();
-      }
-    }
+    this.attackScheduler.update(this.state, dt);
+    this.npcScheduler.update(this.state, dt);
     updateNpcs(this.state, dt);
     updatePlayer(this.state, dt);
     this.state.obstacles.forEach((obstacle) => obstacle.update(dt));
