@@ -198,7 +198,18 @@ export class GameInstance {
 
     this.state.npcs
       .filter((npc) => npc.type === "boat")
-      .forEach((npc) => drawBoat(npc.position, 0));
+      .forEach((npc) => {
+        const waveTime = this.state.t * 3;
+        const waveOffset = Math.sin(waveTime + npc.position.x * 0.1) * 0.3;
+        const waveRotation =
+          Math.sin(waveTime * 1.2 + npc.position.x * 0.15) * 0.02;
+
+        const rockedPosition = new Vector2(
+          npc.position.x,
+          npc.position.y + waveOffset,
+        );
+        drawBoat(rockedPosition, waveRotation);
+      });
 
     this.state.obstacles.forEach((obstacle) => {
       if (obstacle instanceof Temple) obstacle.drawForeground?.();

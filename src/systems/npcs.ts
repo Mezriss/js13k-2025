@@ -25,7 +25,7 @@ export function initNPC(
     return {
       type: "boat",
       value: 1000,
-      speed: 0.3,
+      speed: 0.2,
       position,
       path,
       cycle,

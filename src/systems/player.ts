@@ -63,14 +63,16 @@ function thrash(state: LevelState) {
   thrashing.start.copy(state.player.position);
   thrashing.pivot.copy(state.player.body.chain[1].joint);
   state.animations.thrash = 1;
-  if (state.player.energy > 10) {
+  //TODO change to 100 on release
+  if (state.player.energy >= 10) {
     ringBells(state);
     state.vfx.push(new Ripple(thrashing.pivot, true));
+    state.player.energy = 0;
   } else {
     state.player.energy -= thrashingCost;
     state.vfx.push(new Ripple(thrashing.pivot));
   }
-  // TODO hit boats
+  sinkBoats(state);
 }
 
 function handleControls(state: LevelState, dt: number) {
@@ -131,6 +133,19 @@ const ensureBounds = (state: LevelState) => {
   if (state.player.position.x > cx) state.player.position.x = cx;
   if (state.player.position.y > cy) state.player.position.y = cy;
 };
+
+function sinkBoats(state: LevelState) {
+  for (let i = state.npcs.length - 1; i >= 0; i -= 1) {
+    const npc = state.npcs[i];
+    if (
+      npc.type === "boat" &&
+      npc.position.clone().subtract(thrashing.pivot).length < thrashingRadius
+    ) {
+      state.player.score += npc.value;
+      state.npcs.splice(i, 1);
+    }
+  }
+}
 
 function ringBells(state: LevelState) {
   const temples = state.obstacles.filter(
