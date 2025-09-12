@@ -30,6 +30,7 @@ export type NPCConfig = {
 };
 
 abstract class BaseScheduler<T> {
+  multiplier = 1;
   t = 0;
   rand: Splitmix32;
   originalSchedule: (T | T[])[] = [];
@@ -47,11 +48,12 @@ abstract class BaseScheduler<T> {
     this.t = 0;
     this.schedule = this.originalSchedule.slice();
     this.setCurrent();
+    this.multiplier *= 1.2;
   }
 
   update(state: LevelState, dt: number): boolean {
     if (!this.current) return true;
-    this.t += dt;
+    this.t += dt * this.multiplier;
     for (let i = this.current.length - 1; i >= 0; i--) {
       const config = this.current[i];
       if (this.getTime(config) <= this.t) {
