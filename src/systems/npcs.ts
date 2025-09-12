@@ -1,3 +1,4 @@
+import { SpearAttack } from "@/entities/attack";
 import { maxSpeed } from "../const";
 import { Fish, type FishProps } from "../entities/fish";
 import type { LevelState } from "../game";
@@ -26,6 +27,7 @@ export function initNPC(
       type: "boat",
       value: 1000,
       speed: 0.2,
+      t: 0,
       position,
       path,
       cycle,
@@ -59,10 +61,26 @@ export function updateNpcs(state: LevelState, dt: number): void {
     );
     if (npc.type === "fish") {
       npc.body.update(npc.position);
+    } else {
+      npc.t += dt;
+      if (npc.t >= 3 && !state.outro.t) {
+        npc.t = 0;
+        launchAttack(npc.position, state);
+      }
     }
 
     if (npc.position.clone().subtract(npc.path[0]).length < 10) {
       npc.path.push(npc.path.shift()!);
     }
   }
+}
+
+function launchAttack(from: Vector2, state: LevelState) {
+  const target = state.player.position
+    .clone()
+    .subtract(from)
+    .normalize()
+    .scale(5);
+  const position = from.clone().add(target.scale(10)); //why is 10?
+  state.attacks.push(new SpearAttack(position, target.angle, 1));
 }

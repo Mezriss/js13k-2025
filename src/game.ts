@@ -55,6 +55,7 @@ export type LevelState = {
         cycle: boolean;
         value: number;
         speed: number;
+        t: number;
       }
   )[];
   vfx: Vfx[];
