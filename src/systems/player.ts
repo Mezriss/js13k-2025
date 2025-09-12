@@ -77,7 +77,7 @@ function handleControls(state: LevelState, dt: number) {
   if (controls.action || state.animations.thrash) {
     thrash(state);
   }
-  if (state.animations.thrash) return;
+  if (state.animations.thrash || state.outro.t) return;
 
   const target = new Vector2(
     Math.sign(controls.right - controls.left),

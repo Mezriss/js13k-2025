@@ -46,7 +46,7 @@ export const title = "Ōnamazu";
 export const islands = ["Yaeyama", "Kikai", "Tokara", "Izu", "Jogashima"];
 
 export const lines = {
-  win: "The quake is foretold",
+  win: "People warned, quake foretold",
   lose: "Ouch.",
   bell: "bells rung",
   fish: "fish eaten",

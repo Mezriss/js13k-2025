@@ -16,6 +16,7 @@ import type { Reef } from "./entities/reef";
 import { Temple } from "./entities/temple";
 import type { Result } from "./main";
 import { state } from "./state";
+import { keyEvents } from "./util/keyboard";
 
 export type LevelState = {
   t: number;
@@ -50,6 +51,7 @@ export type LevelState = {
     bell: number;
     boat: number;
   };
+  outro: { t: number; message: string[] };
 };
 
 export class GameInstance {
@@ -58,7 +60,6 @@ export class GameInstance {
   attackScheduler: AttackScheduler;
   npcScheduler: NPCScheduler;
   level: number;
-  outro: { t: number; message: string[] } = { t: 0, message: [] };
 
   constructor(level: number) {
     this.state = {
@@ -87,6 +88,7 @@ export class GameInstance {
         bell: 0,
         boat: 0,
       },
+      outro: { t: 0, message: [] },
     };
 
     updateAnimations(this.state, 0);
@@ -102,8 +104,20 @@ export class GameInstance {
   update(dt: number): Result {
     this.state.t += dt;
 
-    if (this.outro.t) {
-      if (this.state.t - this.outro.t > 7) {
+    this.attackScheduler.update(this.state, dt);
+    this.npcScheduler.update(this.state, dt);
+    updateNpcs(this.state, dt);
+    updatePlayer(this.state, dt);
+    this.state.obstacles.forEach((obstacle) => obstacle.update(dt));
+    updateAnimations(this.state, dt);
+    updateVfx(this.state, dt);
+
+    if (this.state.outro.t) {
+      if (
+        this.state.t - this.state.outro.t > 10 ||
+        keyEvents.find((e) => e[0] === "action")
+      ) {
+        keyEvents.splice(0);
         if ((state.scores[this.level] ?? 0) < this.state.player.score) {
           state.scores[this.level] = this.state.player.score;
         }
@@ -112,34 +126,28 @@ export class GameInstance {
       return;
     }
 
-    this.attackScheduler.update(this.state, dt);
-    this.npcScheduler.update(this.state, dt);
-    updateNpcs(this.state, dt);
-    updatePlayer(this.state, dt);
     updateThreats(this.state, dt);
-    this.state.obstacles.forEach((obstacle) => obstacle.update(dt));
-    updateAnimations(this.state, dt);
-    updateVfx(this.state, dt);
     this.ui.update(this.state, dt);
     updateScore(this.state, dt);
 
     this.handleLevelEnd();
   }
   handleLevelEnd() {
+    //conditions
     if (this.state.player.hp <= 0) {
-      this.outro = { t: this.state.t, message: [lines.lose] };
+      this.state.outro = { t: this.state.t, message: [lines.lose] };
     }
     if (
       !this.state.obstacles.some(
         (obstacle) => obstacle instanceof Temple && !obstacle.ringing,
       )
     ) {
-      this.outro = { t: this.state.t, message: [lines.win] };
+      this.state.outro = { t: this.state.t, message: [lines.win] };
     }
-    if (this.outro.t) {
-      for (const key in this.state.animations) {
-        this.state.animations[key as keyof typeof this.state.animations] = 0;
-      }
+    //actual handling
+    if (this.state.outro.t) {
+      keyEvents.splice(0);
+      this.state.animations.hit = 0;
 
       const extra: string[] = [];
       (["bell", "fish", "boat"] as const).forEach((item) => {
@@ -150,9 +158,9 @@ export class GameInstance {
         }
       });
 
-      this.outro.message.push(`Total Score: ${this.state.player.score}`);
+      this.state.outro.message.push(`Total Score: ${this.state.player.score}`);
       if (extra.length) {
-        this.outro.message.push("Including bonus:", ...extra);
+        this.state.outro.message.push("Including bonus:", ...extra);
       }
     }
   }
@@ -182,7 +190,7 @@ export class GameInstance {
 
     postprocessing();
 
-    if (this.outro.t) {
+    if (this.state.outro.t) {
       this.drawScore();
     } else {
       this.ui.draw();
@@ -195,12 +203,14 @@ export class GameInstance {
     screen.ctx.save();
     //TODO animated text reveal
     screen.ctx.fillStyle = colors.ui;
-    screen.setFont(6);
-    screen.fillText(this.outro.message[0], 0, 0);
-    screen.setFont(4);
-    for (let i = 1; i < this.outro.message.length; i++) {
-      screen.fillText(this.outro.message[i], 0, i * 5 + 5);
+    screen.setFont(5);
+    screen.fillText(this.state.outro.message[0], 0, 0);
+    screen.setFont(3);
+    for (let i = 1; i < this.state.outro.message.length; i++) {
+      screen.fillText(this.state.outro.message[i], 0, i * 4 + 5);
     }
+    screen.setFont(2);
+    screen.fillText("[space]", 0, this.state.outro.message.length * 4 + 5);
 
     screen.ctx.restore();
   }
@@ -245,9 +255,8 @@ const applyScreenShake = (state: LevelState) => {
 };
 
 const drawPlayer = (state: LevelState) => {
-  const easedCatch = easing.parabolic(state.animations.catch);
   const easedThrash = easing.parabolic(state.animations.thrash);
-  const scale = 1 + Math.max(easedCatch * 0.1, easedThrash * 0.2);
+  const scale = 1 + easedThrash * 0.2;
 
   screen.ctx.save();
   screen.ctx.translate(state.player.position.x, state.player.position.y);
