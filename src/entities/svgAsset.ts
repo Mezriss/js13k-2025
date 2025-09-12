@@ -89,9 +89,14 @@ export class SvgAsset {
     this.fill = fill;
     this.stroke = stroke;
   }
-  draw(position: Vector2, scale = new Vector2(1, 1), rotation = 0) {
+  draw(
+    position: Vector2,
+    scale = new Vector2(1, 1),
+    rotation = 0,
+    lineWidth = screen.scale * 0.3 * Math.min(scale.x, scale.y),
+  ) {
     screen.ctx.save();
-    screen.ctx.lineWidth = screen.scale * 0.3 * Math.min(scale.x, scale.y);
+    screen.ctx.lineWidth = lineWidth;
     this.paths.forEach((path, i) => {
       screen.ctx.strokeStyle = this.stroke[i] || this.stroke[0]!;
       if (this.fill[i]) {

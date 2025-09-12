@@ -188,13 +188,13 @@ export class GameInstance {
 
     this.state.attacks.forEach((attack) => attack.draw());
 
-    postprocessing();
-
     if (this.state.outro.t) {
       this.drawScore();
     } else {
       this.ui.draw();
     }
+
+    postprocessing();
 
     // for initial translate
     screen.ctx.restore();
