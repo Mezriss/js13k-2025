@@ -26,6 +26,7 @@ export const namazu: FishProps = {
     eyeIris: "#AAA",
     eyePupil: "black",
   },
+  barbels: true,
 };
 
 export const multipliers = {

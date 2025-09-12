@@ -3,6 +3,7 @@ import { drawEllipse, drawSpline } from "../util/draw";
 import { normalizeAngle, relativeAngleDiff } from "../util/util";
 import { Vector2 } from "@/util/vector2";
 import { screen } from "@/util/draw";
+import barbels from "@/assets/barbels";
 
 const maxAngle = Math.PI / 8;
 
@@ -12,6 +13,7 @@ export type FishProps = {
   scale: number;
   bodyLength: number;
   palette: FishPalette;
+  barbels?: boolean;
 };
 
 type FishPalette = {
@@ -30,6 +32,7 @@ export class Fish {
   segmentLength: number;
   segmentCount: number;
   palette: FishPalette;
+  barbels: boolean;
 
   constructor({
     segmentLength,
@@ -37,12 +40,14 @@ export class Fish {
     scale,
     bodyLength,
     palette,
+    barbels = false,
   }: FishProps) {
     this.scale = scale;
     this.segmentLength = segmentLength;
     this.segmentCount = segmentRadius.length;
     this.bodyLength = bodyLength;
     this.palette = palette;
+    this.barbels = barbels;
 
     this.chain = Array.from({ length: this.segmentCount }, (_e, i) => ({
       joint: new Vector2(0, segmentLength * i),
@@ -72,6 +77,10 @@ export class Fish {
       );
     }
 
+    if (this.barbels) {
+      this._drawBarbels();
+    }
+
     screen.ctx.strokeStyle = this.palette.outline;
     screen.ctx.fillStyle = this.palette.fins;
     screen.ctx.lineWidth = (this.scale * this.segmentLength) / 9;
@@ -82,6 +91,15 @@ export class Fish {
     this._drawBodyOutline();
     this._drawDorsalFin(bodyCurve, maxBodyCurve);
     this._drawEyes();
+  }
+
+  private _drawBarbels() {
+    barbels.draw(
+      getSurfacePoint(this.chain[0], Math.PI, this.chain[0].radius / 2),
+      new Vector2(1, 1).scale(0.05),
+      this.chain[0].angle - Math.PI / 2,
+      screen.scale * 0.2,
+    );
   }
 
   private _drawPectoralFins() {
