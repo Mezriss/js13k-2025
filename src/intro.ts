@@ -177,7 +177,7 @@ export class Intro {
     });
 
     if (this.currentText === script[this.scriptIndex].text) {
-      screen.setFont(2, "sans-serif");
+      screen.setFont(2);
       screen.ctx.fillStyle = colors.ui;
       screen.fillText("[space]", 50, 33);
     }

@@ -1,4 +1,3 @@
-import { fontFamily } from "@/const";
 import type { Vector2 } from "./vector2";
 
 const ASPECT_RATIO = 16 / 9;
@@ -72,7 +71,7 @@ export const screen = {
   },
   setFont(
     size: number,
-    font = fontFamily,
+    font = "sans-serif",
     weight = "bold",
     align: CanvasTextAlign = "center",
     baseline: CanvasTextBaseline = "middle",

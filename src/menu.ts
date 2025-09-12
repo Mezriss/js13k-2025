@@ -1,6 +1,6 @@
 import { screen } from "./util/draw";
 import { keyEvents } from "./util/keyboard";
-import { colors, islands, title } from "./const";
+import { colors, fontFamily, islands, title } from "./const";
 import type { Result } from "./main";
 import { state } from "./state";
 import { drawOnamazu } from "./assets/onamazu";
@@ -75,11 +75,11 @@ export class Menu {
     screen.clear();
     wavePattern();
     drawOnamazu(3);
-    screen.setFont(14);
+    screen.setFont(14, fontFamily);
     screen.ctx.fillStyle = "#fff";
     screen.fillText(title, 0, -28);
 
-    screen.setFont(4, "sans-serif");
+    screen.setFont(4);
 
     switch (this.menu) {
       case "start":
@@ -108,10 +108,11 @@ export class Menu {
   }
   drawLevelSelect() {
     const width = 10;
-    screen.setFont(3, "sans-serif");
+    screen.setFont(3);
 
     screen.fillText("Select Stage", 0, -12);
-    screen.setFont(2, "sans-serif");
+    screen.setFont(2);
+
     for (let i = 0; i < islands.length; i++) {
       const x = (-(islands.length - 1) * width) / 2 + width * i;
       screen.ctx.fillStyle = this.selected === i ? colors.ui : "#fff";
@@ -120,7 +121,7 @@ export class Menu {
 
       screen.fillText(score, x, -3);
     }
-    screen.setFont(3, "sans-serif");
+    screen.setFont(3);
 
     screen.ctx.fillStyle =
       this.selected === islands.length ? colors.ui : "#fff";
