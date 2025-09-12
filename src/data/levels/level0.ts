@@ -21,12 +21,12 @@ export default {
       t: 1,
       variant: "boat",
       position: [90, -40],
-      path: [[-90, -40]],
+      path: [[-110, -40]],
     },
     {
       t: 2,
       variant: "test",
-      position: [-60, -60],
+      position: [-60, -50],
       path: [
         [-30, -30],
         [-30, 30],
