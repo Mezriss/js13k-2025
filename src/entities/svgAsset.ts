@@ -57,8 +57,7 @@ export class SvgAsset {
   ) {
     this.paths = pathData.split("\n").map((path) => {
       const commands: Path = [];
-      path.trim();
-      const tokens = path.match(tokenizer);
+      const tokens = path.trim().match(tokenizer);
       if (!tokens) return commands;
       let lastCommand = "";
       while (tokens.length > 0) {
