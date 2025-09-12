@@ -1,5 +1,9 @@
 import { Reef } from "@/entities/reef";
-import level0 from "../data/levels/level0";
+import level0 from "@/data/levels/level0";
+import level1 from "@/data/levels/level1";
+import level2 from "@/data/levels/level2";
+import level3 from "@/data/levels/level3";
+import level4 from "@/data/levels/level4";
 import type { LevelState } from "../game";
 import { Vector2 } from "../util/vector2";
 import {
@@ -10,7 +14,7 @@ import {
 } from "./scheduler";
 import { Temple } from "@/entities/temple";
 
-const levels: Level[] = [level0];
+const levels: Level[] = [level0, level1, level2, level3, level4];
 
 type LevelGeometry = {
   type: "reef" | "temple";

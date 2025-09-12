@@ -83,7 +83,7 @@ export class Fish {
 
     screen.ctx.strokeStyle = this.palette.outline;
     screen.ctx.fillStyle = this.palette.fins;
-    screen.ctx.lineWidth = (this.scale * this.segmentLength) / 9;
+    screen.ctx.lineWidth = screen.scale * 0.1;
 
     this._drawPectoralFins();
     this._drawVentralFins();

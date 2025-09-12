@@ -41,8 +41,8 @@ abstract class BaseScheduler<T> {
     this.setCurrent();
   }
 
-  update(state: LevelState, dt: number) {
-    if (!this.current) return;
+  update(state: LevelState, dt: number): boolean {
+    if (!this.current) return true;
     this.t += dt;
     for (let i = this.current.length - 1; i >= 0; i--) {
       const config = this.current[i];
@@ -55,6 +55,7 @@ abstract class BaseScheduler<T> {
       this.t = 0;
       this.setCurrent();
     }
+    return false;
   }
 
   setCurrent() {
