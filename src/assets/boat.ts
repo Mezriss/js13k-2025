@@ -39,8 +39,8 @@ M3.9-.7 3.6-1.8 4.5-1.9 4.7-1.1Z
 
 const offsets = [new Vector2(0, -0.75), new Vector2(2.5, -0.75)];
 
-export function drawBoat(position: Vector2) {
-  boat.draw(position);
+export function drawBoat(position: Vector2, rotation: number) {
+  boat.draw(position, undefined, rotation);
   offsets.forEach((offset) => {
     fisherman.draw(
       position.clone().add(offset),

@@ -18,9 +18,15 @@ export default {
   ],
   npcs: [
     {
+      t: 1,
+      variant: "boat",
+      position: [90, -40],
+      path: [[-90, -40]],
+    },
+    {
       t: 2,
       variant: "test",
-      position: [-40, -40],
+      position: [-60, -60],
       path: [
         [-30, -30],
         [-30, 30],

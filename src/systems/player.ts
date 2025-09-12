@@ -20,7 +20,7 @@ export function updatePlayer(state: LevelState, dt: number) {
 }
 
 function catchFish(state: LevelState) {
-  for (const npc of state.npcs) {
+  for (const npc of state.npcs.filter((npc) => npc.type === "fish")) {
     for (let i = 0; i < npc.body.bodyLength; i++) {
       if (
         npc.body.chain[i].joint.clone().subtract(state.player.position).length <

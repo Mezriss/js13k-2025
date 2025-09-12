@@ -21,7 +21,18 @@ export function initNPC(
   path: Vector2[],
   cycle: boolean,
 ): LevelState["npcs"][number] {
+  if (variant === "boat") {
+    return {
+      type: "boat",
+      value: 1000,
+      speed: 0.3,
+      position,
+      path,
+      cycle,
+    };
+  }
   return {
+    type: "fish",
     body: new Fish(npcs[variant].body),
     value: npcs[variant].value,
     speed: npcs[variant].speed,
@@ -46,7 +57,9 @@ export function updateNpcs(state: LevelState, dt: number): void {
         state.obstacles.map((obstacle) => obstacle.collider),
       ),
     );
-    npc.body.update(npc.position);
+    if (npc.type === "fish") {
+      npc.body.update(npc.position);
+    }
 
     if (npc.position.clone().subtract(npc.path[0]).length < 10) {
       npc.path.push(npc.path.shift()!);

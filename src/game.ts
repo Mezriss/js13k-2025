@@ -17,6 +17,7 @@ import { Temple } from "./entities/temple";
 import type { Result } from "./main";
 import { state } from "./state";
 import { keyEvents } from "./util/keyboard";
+import { drawBoat } from "./assets/boat";
 
 export type LevelState = {
   t: number;
@@ -37,14 +38,25 @@ export type LevelState = {
     catch: number;
     thrash: number;
   };
-  npcs: {
-    body: Fish;
-    position: Vector2;
-    path: Vector2[];
-    cycle: boolean;
-    value: number;
-    speed: number;
-  }[];
+  npcs: (
+    | {
+        type: "fish";
+        body: Fish;
+        position: Vector2;
+        path: Vector2[];
+        cycle: boolean;
+        value: number;
+        speed: number;
+      }
+    | {
+        type: "boat";
+        position: Vector2;
+        path: Vector2[];
+        cycle: boolean;
+        value: number;
+        speed: number;
+      }
+  )[];
   vfx: Vfx[];
   counters: {
     fish: number;
@@ -178,9 +190,15 @@ export class GameInstance {
       obstacle.draw();
     });
     this.state.attacks.forEach((attack) => attack.drawHint());
-    this.state.npcs.forEach((npc) => npc.body.draw());
+    this.state.npcs
+      .filter((npc) => npc.type === "fish")
+      .forEach((npc) => npc.body.draw());
 
     drawPlayer(this.state);
+
+    this.state.npcs
+      .filter((npc) => npc.type === "boat")
+      .forEach((npc) => drawBoat(npc.position, 0));
 
     this.state.obstacles.forEach((obstacle) => {
       if (obstacle instanceof Temple) obstacle.drawForeground?.();

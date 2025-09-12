@@ -231,7 +231,9 @@ export class NPCScheduler extends BaseScheduler<NPCConfig> {
         scatteredPath,
         npcConfig.cycle ?? false,
       );
-      npc.body.update(npc.position);
+      if (npc.type === "fish") {
+        npc.body.update(npc.position);
+      }
       state.npcs.push(npc);
     }
   }
