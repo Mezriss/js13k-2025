@@ -84,9 +84,9 @@ export class GameInstance {
     this.state = {
       t: 0,
       player: {
-        body: new Fish(namazu),
-        position: new Vector2(0, -5),
-        velocity: new Vector2(0, 0),
+        body: new Fish(namazu, new Vector2(0, 40)),
+        position: new Vector2(0, 30),
+        velocity: new Vector2(0, -0.2),
         hp: 3,
         energy: 0,
         score: 0,

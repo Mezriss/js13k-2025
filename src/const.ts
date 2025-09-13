@@ -1,4 +1,5 @@
 import type { FishProps } from "./entities/fish";
+import type { NPC } from "./systems/npcs";
 
 export const acceleration = 20;
 export const maxSpeed = 30; // max dimension %
@@ -7,7 +8,7 @@ export const minFrameDuration = 1 / 30;
 export const thrashingCost = 30;
 export const thrashingRadius = 20;
 
-export const levelTime = 120;
+export const levelTime = 60;
 
 export const animationDuration = {
   catch: 0.5,
@@ -55,4 +56,42 @@ export const lines = {
   time: "time remaining",
   fish: "fish eaten",
   boat: "boats overturned",
+};
+
+const fishPaletteBase = {
+  outline: "#AAA",
+  fins: "#333",
+  body: "yellow",
+  eyeSclera: "red",
+  eyeIris: "#AAA",
+  eyePupil: "black",
+};
+
+const baseBody = {
+  segmentLength: 45,
+  segmentRadius: [49, 56, 58, 58, 53, 44, 35, 26, 22, 13, 13, 13],
+  scale: 0.012,
+  bodyLength: 10,
+  palette: {
+    ...fishPaletteBase,
+  },
+};
+
+export const fishA: NPC = {
+  body: baseBody,
+  value: 20,
+  speed: 0.6,
+};
+
+export const fishB: NPC = {
+  body: {
+    ...baseBody,
+    palette: {
+      ...fishPaletteBase,
+      body: "blue",
+      eyeSclera: "teal",
+    },
+  },
+  value: 40,
+  speed: 0.4,
 };

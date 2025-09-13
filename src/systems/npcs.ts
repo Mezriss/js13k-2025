@@ -2,7 +2,7 @@ import { SpearAttack } from "@/entities/attack";
 import { maxSpeed } from "../const";
 import { Fish, type FishProps } from "../entities/fish";
 import type { LevelState } from "../game";
-import { testNPC } from "../testData";
+import { fishA, fishB } from "@/const";
 import { moveAndSlide } from "../util/collision";
 import { Vector2 } from "../util/vector2";
 
@@ -13,7 +13,8 @@ export type NPC = {
 };
 
 const npcs: { [key: string]: NPC } = {
-  test: testNPC,
+  fishA: fishA,
+  fishB: fishB,
 };
 
 export function initNPC(

@@ -34,14 +34,17 @@ export class Fish {
   palette: FishPalette;
   barbels: boolean;
 
-  constructor({
-    segmentLength,
-    segmentRadius,
-    scale,
-    bodyLength,
-    palette,
-    barbels = false,
-  }: FishProps) {
+  constructor(
+    {
+      segmentLength,
+      segmentRadius,
+      scale,
+      bodyLength,
+      palette,
+      barbels = false,
+    }: FishProps,
+    start = new Vector2(),
+  ) {
     this.scale = scale;
     this.segmentLength = segmentLength;
     this.segmentCount = segmentRadius.length;
@@ -50,7 +53,7 @@ export class Fish {
     this.barbels = barbels;
 
     this.chain = Array.from({ length: this.segmentCount }, (_e, i) => ({
-      joint: new Vector2(0, segmentLength * i),
+      joint: start.clone().add(new Vector2(0, segmentLength * i)),
       angle: 0,
       get radius(): number {
         return segmentRadius[i] * scale;

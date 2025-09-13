@@ -63,8 +63,7 @@ function thrash(state: LevelState) {
   thrashing.start.copy(state.player.position);
   thrashing.pivot.copy(state.player.body.chain[1].joint);
   state.animations.thrash = 1;
-  //TODO change to 100 on release
-  if (state.player.energy >= 10) {
+  if (state.player.energy >= 100) {
     ringBells(state);
     state.vfx.push(new Ripple(thrashing.pivot, true));
     state.player.energy = 0;

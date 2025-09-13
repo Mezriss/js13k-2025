@@ -1,7 +1,7 @@
 import type { Level } from "@/systems/level";
 
 export default {
-  name: "Test level",
+  name: "fishA level",
   obstacles: [
     {
       type: "reef",
@@ -25,7 +25,7 @@ export default {
     },
     {
       t: 2,
-      variant: "test",
+      variant: "fishA",
       position: [-60, -50],
       path: [
         [-30, -30],
