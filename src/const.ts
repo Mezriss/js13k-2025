@@ -47,7 +47,7 @@ export const colors = {
 export const fontFamily = "Times New Roman, serif";
 
 export const title = "Ōnamazu";
-export const islands = ["Yaeyama", "Kikai", "Tokara", "Izu", "Jogashima"];
+export const islands = ["Yaeyama", "Kikai", "Izu", "Jogashima"];
 
 export const lines = {
   win: "People warned, quake foretold",

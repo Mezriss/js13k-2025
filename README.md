@@ -10,7 +10,7 @@ Eating fish fills the energy bar. Once it is one-third full, Ōnamazu can thrash
 To finish the level, you must ring all the temple bells to warn people about the upcoming earthquake.
 
 ## Unfrotunately
-I ran out of time, so there is no sound, and only one introductory level is available (the other four are copies of a test level).
+I ran out of time, so there is no sound, and only four level are available.
 
 ## License
 Code: MIT
