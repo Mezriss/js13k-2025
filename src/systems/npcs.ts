@@ -78,7 +78,7 @@ export function updateNpcs(state: LevelState, dt: number): void {
   // cleanup NPC that are out of bounds
   state.npcs = state.npcs.filter(({ position }) => {
     const { x, y } = position;
-    return x > -100 && x < 100 && y > -55 && y < 55;
+    return x > -120 && x < 120 && y > -70 && y < 70;
   });
 }
 

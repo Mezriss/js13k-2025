@@ -173,7 +173,7 @@ export class GameInstance {
       this.state.animations.hit = 0;
 
       const extra: string[] = [];
-      if (this.state.player.hp > 0) {
+      if (this.state.player.hp > 0 && this.state.t < levelTime) {
         extra.push(
           `${lines.time} - ${Math.floor(levelTime - this.state.t) * multipliers.time}`,
         );

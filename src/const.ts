@@ -59,10 +59,10 @@ export const lines = {
 };
 
 const fishPaletteBase = {
-  outline: "#AAA",
+  outline: "#ebec4b",
   fins: "#333",
-  body: "yellow",
-  eyeSclera: "red",
+  body: "#d9d946",
+  eyeSclera: "#32a255",
   eyeIris: "#AAA",
   eyePupil: "black",
 };
@@ -88,8 +88,9 @@ export const fishB: NPC = {
     ...baseBody,
     palette: {
       ...fishPaletteBase,
-      body: "blue",
-      eyeSclera: "teal",
+      outline: "#e47051",
+      body: "#c55335",
+      eyeSclera: "#7ecedc",
     },
   },
   value: 40,
