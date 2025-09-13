@@ -262,7 +262,7 @@ export const defaultTerserOptions: Terser.MinifyOptions = {
 
     // Mangle properties - optimizes a lot but is very dangerous. Enables only with properties starting with $
     properties: {
-      reserved: ["M", "L", "C", "Z", "H", "V"],
+      reserved: ["M", "L", "C", "Z", "H", "V", "fishA", "fishB"],
 
       // Use true to allow the mangling of builtin DOM properties. Not recommended to override this setting.
       builtins: false,
