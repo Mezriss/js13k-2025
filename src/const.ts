@@ -7,6 +7,8 @@ export const minFrameDuration = 1 / 30;
 export const thrashingCost = 30;
 export const thrashingRadius = 20;
 
+export const levelTime = 120;
+
 export const animationDuration = {
   catch: 0.5,
   hit: 0.5,
@@ -32,7 +34,7 @@ export const namazu: FishProps = {
 export const multipliers = {
   fish: 1000,
   boat: 5000,
-  bell: 50000,
+  time: 1000,
 };
 
 export const lsKey = "mzŌ25";
@@ -49,7 +51,8 @@ export const islands = ["Yaeyama", "Kikai", "Tokara", "Izu", "Jogashima"];
 export const lines = {
   win: "People warned, quake foretold",
   lose: "Ouch.",
-  bell: "bells rung",
+  lose1: "Disaster",
+  time: "time remaining",
   fish: "fish eaten",
   boat: "boats overturned",
 };

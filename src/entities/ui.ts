@@ -1,4 +1,4 @@
-import { colors } from "@/const";
+import { colors, levelTime } from "@/const";
 import type { LevelState } from "../game";
 import { drawCircle } from "../util/draw";
 import { easing, Tweened } from "../util/util";
@@ -9,6 +9,7 @@ export class UI {
   hp: number;
   score: Tweened;
   energy: Tweened;
+  t = 0;
 
   constructor(state: LevelState) {
     this.hp = state.player.hp;
@@ -20,6 +21,7 @@ export class UI {
     this.hp = state.player.hp;
     this.score.update(state.player.score, dt);
     this.energy.update(state.player.energy, dt);
+    this.t += dt;
   }
 
   draw() {
@@ -28,6 +30,14 @@ export class UI {
     this.drawHP();
     this.drawScore();
     this.drawEnergy();
+    this.drawTimer();
+  }
+  drawTimer() {
+    screen.setFont(3);
+    const t = levelTime - this.t;
+    const minutes = `${Math.floor(t / 60)}`.padStart(2, "0");
+    const seconds = `${Math.floor(t % 60)}`.padStart(2, "0");
+    screen.fillText(`${minutes}:${seconds}`, 0, -40);
   }
   drawHP() {
     for (let i = 0; i < this.hp; i++) {
@@ -37,9 +47,7 @@ export class UI {
     }
   }
   drawScore() {
-    screen.ctx.font = `${Math.floor(screen.scale * 3)}px Arial`;
-    screen.ctx.textAlign = "right";
-    screen.ctx.textBaseline = "middle";
+    screen.setFont(3, undefined, undefined, "right");
     screen.fillText(
       Math.floor(Math.floor(this.score.value)).toString().padStart(6, "0"),
       75,

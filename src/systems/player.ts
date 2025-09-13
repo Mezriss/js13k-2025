@@ -156,8 +156,6 @@ function ringBells(state: LevelState) {
       temple.position.clone().subtract(thrashing.pivot).length < thrashingRadius
     ) {
       if (!temple.ringing) {
-        state.player.score += multipliers.bell;
-        state.counters.bell += 1;
         temple.ring();
       }
     }

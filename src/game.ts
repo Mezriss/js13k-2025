@@ -1,7 +1,14 @@
 import { Fish } from "./entities/fish";
 import { Vector2 } from "./util/vector2";
 import { screen } from "./util/draw";
-import { animationDuration, colors, lines, multipliers, namazu } from "./const";
+import {
+  animationDuration,
+  colors,
+  levelTime,
+  lines,
+  multipliers,
+  namazu,
+} from "./const";
 import { updatePlayer } from "./systems/player";
 import type { StoneAttack } from "./entities/attack";
 import { updateThreats } from "./systems/threats";
@@ -61,7 +68,6 @@ export type LevelState = {
   vfx: Vfx[];
   counters: {
     fish: number;
-    bell: number;
     boat: number;
   };
   outro: { t: number; message: string[] };
@@ -98,7 +104,6 @@ export class GameInstance {
       vfx: [],
       counters: {
         fish: 0,
-        bell: 0,
         boat: 0,
       },
       outro: { t: 0, message: [] },
@@ -117,8 +122,10 @@ export class GameInstance {
   update(dt: number): Result {
     this.state.t += dt;
 
-    this.attackScheduler.update(this.state, dt);
-    this.npcScheduler.update(this.state, dt);
+    if (!this.state.outro.t) {
+      this.attackScheduler.update(this.state, dt);
+      this.npcScheduler.update(this.state, dt);
+    }
     updateNpcs(this.state, dt);
     updatePlayer(this.state, dt);
     this.state.obstacles.forEach((obstacle) => obstacle.update(dt));
@@ -147,6 +154,9 @@ export class GameInstance {
   }
   handleLevelEnd() {
     //conditions
+    if (this.state.t >= levelTime) {
+      this.state.outro = { t: this.state.t, message: [lines.lose1] };
+    }
     if (this.state.player.hp <= 0) {
       this.state.outro = { t: this.state.t, message: [lines.lose] };
     }
@@ -163,13 +173,21 @@ export class GameInstance {
       this.state.animations.hit = 0;
 
       const extra: string[] = [];
-      (["bell", "fish", "boat"] as const).forEach((item) => {
-        if (this.state.counters[item]) {
-          extra.push(
-            `${lines[item]} × ${this.state.counters[item]} - ${this.state.counters[item] * multipliers[item]}`,
-          );
-        }
-      });
+      if (this.state.player.hp > 0) {
+        extra.push(
+          `${lines.time} - ${Math.floor(levelTime - this.state.t) * multipliers.time}`,
+        );
+      }
+      if (this.state.counters.boat) {
+        extra.push(
+          `${lines.boat} × ${this.state.counters.boat} - ${this.state.counters.boat * multipliers.boat}`,
+        );
+      }
+      if (this.state.counters.fish) {
+        extra.push(
+          `${lines.fish} × ${this.state.counters.fish} - ${this.state.counters.fish * multipliers.fish}`,
+        );
+      }
 
       this.state.outro.message.push(`Total Score: ${this.state.player.score}`);
       if (extra.length) {
